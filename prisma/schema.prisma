@@ -1,11 +1,15 @@
 // CyberSoft Tester — data model
 // -------------------------------------------------------------------
-// PRODUCTION: provider = "postgresql". Point DATABASE_URL at your
-// Postgres instance (VPS local, Neon, Supabase...), then:
+// TRIỂN KHAI HIỆN TẠI: provider = "sqlite" (giống site anh em entrance —
+// gọn, tự chứa, không cần cài DB server). DATABASE_URL trỏ tới file .db:
+//   - Dev:  DATABASE_URL="file:./dev.db"          (→ prisma/dev.db)
+//   - Prod: DATABASE_URL="file:C:/ProgramData/testing/prod.db"  (nằm NGOÀI thư
+//           mục deploy để không bị mất khi redeploy)
+// Đồng bộ + nạp:
 //   npx prisma db push   (đồng bộ schema)
 //   npm run db:seed      (nạp/cập nhật nội dung — KHÔNG phá dữ liệu)
-// Muốn quay lại dev nhanh bằng SQLite: đổi provider = "sqlite" và
-// DATABASE_URL="file:./dev.db". Schema tương thích cả hai.
+// KHI SCALE LỚN → Postgres: đổi provider = "postgresql" và DATABASE_URL trỏ
+//   Postgres (Neon/Supabase/VPS, nên bật pooling). Schema tương thích cả hai.
 // -------------------------------------------------------------------
 
 generator client {
@@ -13,7 +17,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 

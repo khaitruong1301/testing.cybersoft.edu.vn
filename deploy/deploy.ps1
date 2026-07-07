@@ -36,6 +36,10 @@ try {
   npx prisma db push --skip-generate
   if ($LASTEXITCODE -ne 0) { throw "prisma db push failed" }
 
+  Write-Host "==> db seed (upsert noi dung, an toan)"
+  npm run db:seed
+  if ($LASTEXITCODE -ne 0) { throw "db seed failed" }
+
   Write-Host "==> next build"
   npm run build
   if ($LASTEXITCODE -ne 0) { throw "next build failed" }
