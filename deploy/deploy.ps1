@@ -1,7 +1,7 @@
 # deploy.ps1 - goi boi self-hosted runner o moi lan push vao main.
 # Chay tai thu muc checkout cua runner (repo root la thu muc cha cua \deploy).
 # Dong bo source vao C:\apps\testing, build Next.js, roi restart service + health check.
-# GIU LAI .env production va du lieu runtime tren server (Postgres nam ngoai thu muc deploy).
+# GIU LAI .env production + DB (SQLite o C:\ProgramData\testing, ngoai thu muc deploy).
 # LUU Y: file nay phai thuan ASCII (Windows PowerShell 5.1 doc .ps1 khong-BOM theo cp1252).
 $ErrorActionPreference = "Stop"
 
@@ -24,7 +24,12 @@ if (-not (Test-Path "$dest\.env")) {
   throw "Thieu $dest\.env - tao file .env production tren server truoc (xem .env.example)."
 }
 
-# --- 2) Cai dat + build trong dest (dung .env cua server) ---
+# --- 2) DUNG service truoc khi dung toi node_modules/.next (tranh loi EPERM do file bi khoa) ---
+Write-Host "==> Stop service 'testing' (giai phong lock)"
+& $nssm stop testing
+Start-Sleep -Seconds 3
+
+# --- 3) Cai dat + build trong dest (dung .env cua server) ---
 Push-Location $dest
 try {
   Write-Host "==> npm ci"
@@ -49,9 +54,9 @@ finally {
   Pop-Location
 }
 
-# --- 3) Restart service + health check ---
-Write-Host "==> Restart service 'testing'"
-& $nssm restart testing
+# --- 4) Start service + health check ---
+Write-Host "==> Start service 'testing'"
+& $nssm start testing
 Start-Sleep -Seconds 8
 
 Write-Host "==> Health check http://127.0.0.1:$port/"
