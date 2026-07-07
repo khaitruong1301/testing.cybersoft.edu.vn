@@ -14,8 +14,9 @@ Write-Host "==> Deploy from '$repo' -> '$dest'"
 New-Item -ItemType Directory -Force -Path $dest | Out-Null
 
 # --- 1) Sync source -> dest ---
-# /MIR mirror; loai node_modules/.next/.git khoi copy VA khoi purge; giu .env + SECRETS.local.md tren server.
-robocopy $repo $dest /MIR /XD node_modules .next .git /XF .env SECRETS.local.md /NFL /NDL /NJH /NJS /NP | Out-Null
+# /MIR mirror; loai (khoi copy VA khoi purge): node_modules/.next/.git (build/git),
+# _bin (nssm.exe) + logs (runtime tren server). Giu .env + SECRETS.local.md tren server.
+robocopy $repo $dest /MIR /XD node_modules .next .git _bin logs /XF .env SECRETS.local.md /NFL /NDL /NJH /NJS /NP | Out-Null
 if ($LASTEXITCODE -ge 8) { throw "robocopy failed (code $LASTEXITCODE)" }
 $global:LASTEXITCODE = 0
 
