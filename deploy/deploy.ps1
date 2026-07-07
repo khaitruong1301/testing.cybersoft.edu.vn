@@ -3,7 +3,15 @@
 # Dong bo source vao C:\apps\testing, build Next.js, roi restart service + health check.
 # GIU LAI .env production + DB (SQLite o C:\ProgramData\testing, ngoai thu muc deploy).
 # LUU Y: file nay phai thuan ASCII (Windows PowerShell 5.1 doc .ps1 khong-BOM theo cp1252).
-$ErrorActionPreference = "Stop"
+
+# KHONG dung ErrorActionPreference=Stop: native command (npm/npx/next/prisma) hay in canh bao
+# ra stderr, voi Stop se bi coi la loi terminating du lenh THANH CONG. Thay vao do kiem
+# $LASTEXITCODE tuong minh sau moi lenh (throw se van dung du preference la Continue).
+$ErrorActionPreference = "Continue"
+$ProgressPreference = "SilentlyContinue"
+$env:NEXT_TELEMETRY_DISABLED = "1"
+$env:CHECKPOINT_DISABLE = "1"
+$env:PRISMA_HIDE_UPDATE_MESSAGE = "1"
 
 $repo = Split-Path -Parent $PSScriptRoot        # repo root (runner checkout)
 $dest = "C:\apps\testing"
@@ -60,6 +68,10 @@ Write-Host "==> Start service 'testing'"
 Start-Sleep -Seconds 8
 
 Write-Host "==> Health check http://127.0.0.1:$port/"
-$r = Invoke-WebRequest -Uri "http://127.0.0.1:$port/" -UseBasicParsing -TimeoutSec 30
+try {
+  $r = Invoke-WebRequest -Uri "http://127.0.0.1:$port/" -UseBasicParsing -TimeoutSec 30
+} catch {
+  throw "Health check FAIL (khong ket noi): $($_.Exception.Message)"
+}
 if ($r.StatusCode -ne 200) { throw "Health check FAIL: HTTP $($r.StatusCode)" }
 Write-Host "==> OK - / returned $($r.StatusCode). Deploy done."
