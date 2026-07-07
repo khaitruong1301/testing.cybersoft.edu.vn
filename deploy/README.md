@@ -1,5 +1,15 @@
 # Deploy — testing.cybersoft.edu.vn (Windows Server + IIS + CI/CD)
 
+> ## ✅ TRẠNG THÁI: ĐÃ TRIỂN KHAI (live)
+> - **URL:** https://testing.cybersoft.edu.vn (HTTPS Let's Encrypt, tự gia hạn qua win-acme).
+> - **Server:** `157.245.63.139` (WIN-B3FKMJ2L0AV) — dùng chung với entrance & nhiều site khác.
+> - **App:** `C:\apps\testing` · service Windows **`testing`** (nssm, chạy `next start -p 3210`).
+> - **DB:** SQLite tại **`C:\ProgramData\testing\prod.db`** (ngoài thư mục deploy → redeploy không mất).
+> - **IIS site:** `testing` (id 14), path `C:\apps\testing-site\web.config` (ARR reverse proxy → 3210).
+> - **Runner CI/CD:** `C:\actions-runner-testing`, service **`actions.runner.testing`** (nssm, LocalSystem),
+>   nhãn `testing`. `git push main` → tự CI + deploy.
+> - **Admin:** `admin@cybersoft.edu.vn` — đổi mật khẩu ngay trong `/admin` (hoặc dùng `/reset-admin`).
+
 Hạ tầng **mirror theo hệ thống `entrance`** (cùng server Windows dùng chung nhiều site):
 
 ```
