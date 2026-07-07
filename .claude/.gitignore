@@ -1,0 +1,5 @@
+# Cài đặt cá nhân của từng người — không chia sẻ qua repo
+settings.local.json
+
+# Thư mục làm việc tạm
+.tmp/

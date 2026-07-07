@@ -1,0 +1,49 @@
+name: CI/CD - testing.cybersoft.edu.vn
+
+# Chạy CI (kiểm tra build) trên GitHub-hosted; deploy trên self-hosted runner đặt tại server Windows.
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  ci:
+    name: Kiểm tra (prisma + build)
+    runs-on: ubuntu-latest
+    env:
+      # Giá trị giả để build/generate không kẹt vì thiếu env. KHÔNG kết nối DB thật lúc build
+      # (route đọc cookie là dynamic nên Next không truy vấn DB khi build).
+      DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci?schema=public"
+      AUTH_SECRET: "ci-build-secret-please-override-in-production-0000"
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Thiết lập Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+      - name: Cài phụ thuộc
+        run: npm ci
+      - name: Sinh Prisma Client & kiểm schema
+        run: |
+          npx prisma generate
+          npx prisma validate
+      - name: Kiểm cú pháp module nội dung seed
+        run: node --check prisma/seed.mjs
+      - name: Build Next.js
+        run: npm run build
+
+  deploy:
+    name: Deploy lên Windows/IIS (self-hosted)
+    needs: ci
+    runs-on: [self-hosted, windows, testing]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Triển khai + restart service + health check
+        shell: powershell
+        run: .\deploy\deploy.ps1

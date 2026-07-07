@@ -1,0 +1,12 @@
+{
+  "name": "CyberSoft Tester",
+  "short_name": "CS Tester",
+  "description": "Nền tảng luyện nghề Tester — CyberSoft",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f6fb",
+  "theme_color": "#1a72f5",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

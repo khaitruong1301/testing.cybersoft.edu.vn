@@ -1,0 +1,181 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  background: #e9edf6;
+  color: #1d1d1f;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Apple-style tight tracking on display headings */
+h1,
+h2 {
+  letter-spacing: -0.022em;
+}
+h3 {
+  letter-spacing: -0.012em;
+}
+
+/* Liquid-glass ambient background: soft colored light behind frosted panels. */
+body {
+  position: relative;
+  min-height: 100vh;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(42rem 42rem at 6% -8%, rgba(59, 130, 246, 0.28), transparent 60%),
+    radial-gradient(40rem 40rem at 102% 2%, rgba(168, 85, 247, 0.22), transparent 60%),
+    radial-gradient(48rem 48rem at 50% 108%, rgba(14, 165, 233, 0.22), transparent 60%),
+    radial-gradient(30rem 30rem at 80% 60%, rgba(236, 72, 153, 0.12), transparent 60%),
+    linear-gradient(180deg, #eef2fb 0%, #e6ecf7 100%);
+  /* NOTE: no background-attachment:fixed — it forces expensive repaints on scroll. */
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* ===== Liquid Glass utilities =====
+   PERF: the many repeated surfaces (cards, chips) use a solid translucent
+   background WITHOUT backdrop-filter, so scrolling stays smooth. Only the few
+   sticky/overlay surfaces (.glass-nav, .glass-strong) use real live blur. */
+.glass {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 6px 22px rgba(15, 23, 42, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+.glass-strong {
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 10px 34px rgba(15, 23, 42, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+.glass-nav {
+  background: rgba(255, 255, 255, 0.68);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+}
+.glass-hover {
+  transition: background 0.18s, transform 0.18s, box-shadow 0.18s;
+}
+.glass-hover:hover {
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 12px 34px rgba(15, 23, 42, 0.13), inset 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+.glass-tint {
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+/* MOBILE: app-like phone column. DESKTOP: full-width web. */
+.app-shell {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: transparent;
+  position: relative;
+}
+@media (max-width: 767px) {
+  .app-shell {
+    max-width: 520px;
+    margin: 0 auto;
+  }
+  .safe-bottom {
+    padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Prevent image / text saving in the viewer */
+.no-save img {
+  -webkit-user-drag: none;
+  user-select: none;
+  pointer-events: none;
+}
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.fade-up {
+  animation: fadeUp 0.3s ease both;
+}
+
+/* Document page look for the viewer */
+.doc-page {
+  background: #fff;
+  color: #1e293b;
+  line-height: 1.7;
+}
+.doc-page h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.75rem;
+}
+.doc-page p {
+  margin: 0 0 0.85rem;
+  font-size: 1.02rem;
+}
+.doc-page ul {
+  margin: 0 0 0.95rem;
+  padding-left: 1.25rem;
+}
+.doc-page li {
+  margin-bottom: 0.4rem;
+  font-size: 1.0rem;
+}
+.doc-page pre {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 1rem 1.1rem;
+  border-radius: 0.6rem;
+  overflow-x: auto;
+  font-size: 0.86rem;
+  margin: 0 0 1rem;
+}
+.doc-page .note {
+  background: #eff6ff;
+  border-left: 4px solid #2f90ff;
+  padding: 0.8rem 1rem;
+  border-radius: 0.4rem;
+  margin: 0 0 1rem;
+  font-size: 0.96rem;
+  color: #1e40af;
+}

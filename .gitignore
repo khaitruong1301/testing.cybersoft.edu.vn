@@ -1,0 +1,34 @@
+# ---- Node / Next.js ----
+node_modules
+.next
+out
+build
+*.log
+
+# ---- Biến môi trường (BÍ MẬT — KHÔNG commit) ----
+.env
+.env.*
+!.env.example
+
+# ---- Prisma ----
+prisma/dev.db
+prisma/dev.db-journal
+*.db
+*.sqlite
+*.sqlite3
+# File tạm/thử nghiệm trong quá trình biên tập nội dung
+prisma/_*.mjs
+prisma/*.tmp.mjs
+prisma/.fuse_hidden*
+
+# ---- Claude Code — cài đặt cá nhân ----
+.claude/settings.local.json
+
+# ---- Bí mật bàn giao (loại qua .git/info/exclude, để đây cho chắc) ----
+SECRETS.local.md
+
+# ---- Dự án tham chiếu bị copy lồng vào (KHÔNG thuộc repo này) ----
+HeThongThi/
+
+# ---- Hệ điều hành ----
+.DS_Store

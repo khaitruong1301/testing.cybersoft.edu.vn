@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(npm install)",
+      "Bash(npm ci)",
+      "Bash(npm run dev:*)",
+      "Bash(npm run build)",
+      "Bash(npm run lint)",
+      "Bash(npm run db:generate)",
+      "Bash(npm run db:push)",
+      "Bash(npm run db:seed)",
+      "Bash(npm run setup)",
+      "Bash(npx prisma generate)",
+      "Bash(npx prisma validate)",
+      "Bash(npx prisma db push)",
+      "Bash(npx prisma studio)",
+      "Bash(node:*)",
+      "Bash(curl http://localhost:*)",
+      "Bash(curl -s http://localhost:*)",
+      "Bash(curl -s -o /dev/null -w:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(grep:*)",
+      "Bash(rg:*)",
+      "Bash(find:*)",
+      "Bash(wc:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(sqlite3:*)",
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git add:*)",
+      "Read(//Users/khai/Downloads/cybersoft-tester-deploy/**)"
+    ],
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(npx prisma migrate reset:*)",
+      "Bash(pg_dump:*)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./SECRETS.local.md)",
+      "Read(./prisma/dev.db)",
+      "Bash(rm -rf:*)",
+      "Bash(npx prisma db push --force-reset:*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/validate-content.mjs\""
+          }
+        ]
+      }
+    ]
+  }
+}

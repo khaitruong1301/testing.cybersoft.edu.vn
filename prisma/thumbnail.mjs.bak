@@ -1,0 +1,129 @@
+// thumbnail.mjs — sinh THUMBNAIL SVG 16/10 (viewBox 160x100) đặc trưng cho từng bài.
+// Đổi màu theo DOMAIN + motif theo KIND để mỗi bài trông khác nhau (không nhàm).
+// Trả về chuỗi SVG thô -> gán vào article.cover (viewer render full-bleed).
+
+const DOMAIN_PALETTE = {
+  banking: ["#0b1220", "#12315e"], fintech: ["#0b1220", "#155e63"],
+  insurance: ["#1e1b4b", "#3730a3"], healthcare: ["#083344", "#0e7490"],
+  ecommerce: ["#3b0764", "#7c2d92"], retail: ["#7c2d12", "#c2410c"],
+  crm: ["#134e4a", "#0f766e"], erp: ["#1f2937", "#374151"],
+  saas: ["#0c4a6e", "#0369a1"], logistics: ["#422006", "#a16207"],
+  telecom: ["#4a044e", "#a21caf"], gov: ["#0f172a", "#334155"],
+  edtech: ["#052e2b", "#047857"], default: ["#0f172a", "#1e3a8a"],
+};
+
+// Nhận diện CHỦ ĐỀ chính của bài từ nhãn (label) + kind → mỗi bài một biểu tượng riêng,
+// đại diện nội dung (browser, network, component, trace, flaky, parallel, security, cli, ai...).
+export function classifyMotif(label, kind) {
+  const s = " " + String(label || "").toUpperCase() + " ";
+  const has = (...ks) => ks.some((k) => s.includes(k));
+  if (has("PASSKEY", "WEBAUTHN", "SECURITY", "OAUTH", "LOGIN", " AUTH", "XSS", "PENTEST", "BẢO MẬT")) return "security";
+  if (has("NETWORK", "WS MOCK", " MOCK", " HAR", "ROUTE", "INTERCEPT", "REQUEST", "MẠNG")) return "network";
+  if (has("COMPONENT", " CT ", "REACT", "VUE", "SVELTE")) return "component";
+  if (has("TRACE", "UI MODE", "DEBUG", "INSPECT", "REPORT", "VIEWER")) return "trace";
+  if (has("ANTI-FLAKY", "FLAKY", "RETRY", "STABIL", "ỔN ĐỊNH")) return "flaky";
+  if (has("PARALLEL", "SHARD", "RUNTIME", "SCALE", "PIPELINE")) return "parallel";
+  if (has("PERF", "PERFORMANCE", "LOAD", " K6", "JMETER", "BENCH", "HIỆU NĂNG", "TẢI")) return "chart";
+  if (has(" API", "REST", "GRAPHQL", "CONTRACT", "PACT", "POSTMAN", "ENDPOINT")) return "api";
+  if (has("CODEGEN", " CLI", "SKILLS", "SCRIPT", " CODE")) return "cli";
+  if (has("CHROME", "BROWSER", "WEBKIT", "FIREFOX", "EDGE", "SAFARI")) return "browser";
+  if (has("APPIUM", "MOBILE", "DEVICE", "THIẾT BỊ", "RESPONSIVE")) return "device";
+  if (has("STORAGE", "DATABASE", " DB ", " DATA", "FIXTURE", "DỮ LIỆU")) return "database";
+  if (has("AGENT", "AI-NATIVE", " AI ", " MCP", " LLM", "CLAUDE", " GPT", "PROMPT")) return "ai";
+  if (has("PHỎNG VẤN", "INTERVIEW")) return "qa";
+  if (has("DOANH NGHIỆP", "ENTERPRISE", "BANKING", "NGÂN HÀNG", "THỰC CHIẾN", "FINTECH")) return "building";
+  return { thucchien: "building", phongvan: "qa", nangcao: "chart", tichhop: "nodes", ai: "ai" }[kind] || "gear";
+}
+
+// Vẽ biểu tượng đại diện nội dung. accent = màu sáng nổi.
+export function motif(type, ac) {
+  const D = "#0f172a";
+  switch (type) {
+    case "browser":
+      return `<rect x="40" y="26" width="80" height="52" rx="7" fill="#fff"/><rect x="40" y="26" width="80" height="13" rx="7" fill="${ac}"/><circle cx="49" cy="32.5" r="2" fill="#fff"/><circle cx="56" cy="32.5" r="2" fill="#fff"/><rect x="66" y="30" width="46" height="5" rx="2.5" fill="#fff" opacity="0.75"/><rect x="50" y="49" width="60" height="5" rx="2.5" fill="${D}" opacity="0.15"/><rect x="50" y="60" width="40" height="5" rx="2.5" fill="${D}" opacity="0.12"/>`;
+    case "network":
+      return `<circle cx="52" cy="34" r="8" fill="${ac}"/><circle cx="52" cy="70" r="8" fill="${ac}"/><circle cx="110" cy="52" r="10" fill="${ac}"/><g stroke="${ac}" stroke-width="2.5" fill="none"><path d="M59 38 L101 49 M59 66 L101 55"/></g><circle cx="86" cy="28" r="4" fill="#fff" opacity="0.85"/><path d="M56 34 L84 28" stroke="${ac}" stroke-width="1.5" stroke-dasharray="3 3"/>`;
+    case "component":
+      return `<rect x="44" y="28" width="30" height="30" rx="5" fill="${ac}"/><rect x="82" y="28" width="30" height="30" rx="5" fill="#fff"/><rect x="63" y="50" width="30" height="30" rx="5" fill="#fff" opacity="0.85"/><circle cx="78" cy="28" r="5" fill="${ac}"/>`;
+    case "trace":
+      return `<rect x="44" y="42" width="9" height="28" rx="2" fill="#fff"/><rect x="58" y="30" width="9" height="40" rx="2" fill="#fff"/><rect x="72" y="48" width="9" height="22" rx="2" fill="#fff"/><circle cx="104" cy="44" r="14" fill="none" stroke="${ac}" stroke-width="5"/><path d="M114 54 l10 10" stroke="${ac}" stroke-width="6" stroke-linecap="round"/>`;
+    case "flaky":
+      return `<path d="M80 26 l32 52 h-64 z" fill="${ac}"/><rect x="76.5" y="44" width="7" height="18" rx="3.5" fill="${D}"/><circle cx="80" cy="68" r="3.5" fill="${D}"/>`;
+    case "parallel":
+      return `<g fill="none" stroke="${ac}" stroke-width="5" stroke-linecap="round"><path d="M44 40 h58"/><path d="M44 60 h58"/></g><path d="M98 32 l16 8 -16 8z" fill="${ac}"/><path d="M98 52 l16 8 -16 8z" fill="${ac}"/>`;
+    case "chart":
+      return `<g fill="${ac}"><rect x="44" y="58" width="12" height="14" rx="2"/><rect x="62" y="48" width="12" height="24" rx="2"/><rect x="80" y="38" width="12" height="34" rx="2"/><rect x="98" y="28" width="12" height="44" rx="2"/></g><path d="M46 46 L112 24" stroke="#fff" stroke-width="2.5" opacity="0.8"/><path d="M104 22 l10 0 l0 10" stroke="#fff" stroke-width="2.5" fill="none"/>`;
+    case "api":
+      return `<text x="40" y="68" font-size="48" font-weight="800" fill="${ac}" font-family="monospace">{</text><text x="104" y="68" font-size="48" font-weight="800" fill="${ac}" font-family="monospace">}</text><rect x="66" y="38" width="30" height="5" rx="2.5" fill="#fff"/><rect x="66" y="50" width="24" height="5" rx="2.5" fill="#fff" opacity="0.7"/><rect x="66" y="62" width="30" height="5" rx="2.5" fill="#fff" opacity="0.5"/>`;
+    case "cli":
+      return `<rect x="40" y="28" width="80" height="48" rx="7" fill="#0b1020" stroke="${ac}"/><path d="M50 44 l11 8 -11 8" stroke="${ac}" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><rect x="66" y="58" width="30" height="4" rx="2" fill="${ac}"/>`;
+    case "ai":
+      return `<rect x="56" y="34" width="48" height="40" rx="11" fill="#fff"/><line x1="80" y1="24" x2="80" y2="34" stroke="#fff" stroke-width="3"/><circle cx="80" cy="21" r="4" fill="${ac}"/><circle cx="70" cy="52" r="5" fill="${ac}"/><circle cx="90" cy="52" r="5" fill="${ac}"/><rect x="70" y="63" width="20" height="4" rx="2" fill="${D}" opacity="0.3"/><rect x="47" y="46" width="6" height="16" rx="3" fill="#fff" opacity="0.6"/><rect x="107" y="46" width="6" height="16" rx="3" fill="#fff" opacity="0.6"/>`;
+    case "device":
+      return `<rect x="42" y="28" width="54" height="40" rx="4" fill="#fff"/><rect x="60" y="70" width="22" height="3" rx="1.5" fill="#fff" opacity="0.6"/><rect x="100" y="40" width="18" height="32" rx="4" fill="${ac}"/><rect x="103" y="45" width="12" height="21" rx="1.5" fill="#fff"/>`;
+    case "database":
+      return `<ellipse cx="80" cy="34" rx="26" ry="9" fill="#fff"/><path d="M54 34 v32 a26 9 0 0 0 52 0 v-32 a26 9 0 0 1 -52 0" fill="#fff"/><path d="M54 50 a26 9 0 0 0 52 0" fill="none" stroke="${ac}" stroke-width="2.5"/><ellipse cx="80" cy="34" rx="26" ry="9" fill="none" stroke="${ac}" stroke-width="2.5"/>`;
+    case "security":
+      return `<path d="M80 24 l24 9 v16 c0 15 -10 26 -24 31 -14 -5 -24 -16 -24 -31 v-16 z" fill="#fff"/><circle cx="80" cy="47" r="7" fill="none" stroke="${ac}" stroke-width="3.5"/><path d="M80 54 v11" stroke="${ac}" stroke-width="3.5" stroke-linecap="round"/>`;
+    case "qa":
+      return `<rect x="46" y="26" width="42" height="30" rx="7" fill="${ac}"/><path d="M56 56 l0 9 10-9z" fill="${ac}"/><rect x="54" y="36" width="24" height="4" rx="2" fill="${D}" opacity="0.35"/><rect x="54" y="44" width="16" height="4" rx="2" fill="${D}" opacity="0.25"/><circle cx="104" cy="44" r="15" fill="none" stroke="${ac}" stroke-width="3"/><text x="104" y="50" text-anchor="middle" font-size="18" font-weight="800" fill="${ac}">?</text>`;
+    case "building":
+      return `<rect x="40" y="28" width="40" height="44" rx="4" fill="#0b0f1a" stroke="${ac}"/><path d="M40 28 h40 v-6 l-20 -8 l-20 8 z" fill="${ac}"/><g stroke="${ac}" stroke-width="2.5"><path d="M48 42 v22 M60 42 v22 M72 42 v22"/></g><circle cx="116" cy="52" r="14" fill="#052e16"/><path d="M109 52 l5 5 9 -11" stroke="#34d399" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+    case "nodes":
+      return `<circle cx="52" cy="34" r="9" fill="${ac}"/><circle cx="52" cy="66" r="9" fill="${ac}"/><circle cx="104" cy="50" r="11" fill="${ac}"/><g stroke="${ac}" stroke-width="2.5" fill="none"><path d="M60 38 L96 48 M60 62 L96 54"/></g><circle cx="128" cy="30" r="7" fill="${ac}" opacity="0.7"/><path d="M114 46 L122 34" stroke="${ac}" stroke-width="2" stroke-dasharray="3 3"/>`;
+    default: // gear + code
+      return `<circle cx="60" cy="50" r="16" fill="none" stroke="${ac}" stroke-width="6"/><circle cx="60" cy="50" r="5" fill="${ac}"/>${Array.from({ length: 8 }).map((_, i) => `<rect x="58" y="26" width="4" height="8" rx="1.5" fill="${ac}" transform="rotate(${i * 45} 60 50)"/>`).join("")}<g stroke="${ac}" stroke-width="2.5" fill="none"><path d="M92 40 l-8 10 l8 10 M108 40 l8 10 l-8 10"/></g>`;
+  }
+}
+
+// FNV-1a hash → số duy nhất theo chuỗi (để mỗi bài một màu/hoạ tiết khác nhau).
+function h32(s) {
+  let h = 2166136261 >>> 0;
+  s = String(s);
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+  return h >>> 0;
+}
+// HSL → hex (đảm bảo tương thích mọi trình render SVG).
+function hsl(h, s, l) {
+  s /= 100; l /= 100;
+  const k = (n) => (n + h / 30) % 12;
+  const a = s * Math.min(l, 1 - l);
+  const f = (n) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+  const to = (x) => Math.round(255 * x).toString(16).padStart(2, "0");
+  return `#${to(f(0))}${to(f(8))}${to(f(4))}`;
+}
+
+// Mỗi bài MỘT thumbnail RIÊNG: màu (hue) suy từ hash id → không trùng nhau;
+// motif theo `kind` để đại diện tổng quan nội dung; chấm trang trí seeded theo id.
+// "Hero editorial cover" theo tinh thần daily.dev: ảnh full-bleed 16/10, nền gradient
+// riêng từng bài, texture chấm, spotlight tạo chiều sâu, minh hoạ chủ đề LỚN ở giữa, và
+// dải scrim dưới cùng làm nổi nhãn. Không hai bài nào giống nhau.
+export function makeThumb({ id = "t", domain = "default", kind = "congnghe", label = "" }) {
+  const seed = h32(id + "|" + kind + "|" + label + "|" + domain);
+  const hue = seed % 360;
+  const hue2 = (hue + 26 + (seed % 46)) % 360;
+  const c0 = hsl(hue, 62, 12 + (seed % 6));                 // nền tối (góc trên-trái)
+  const c1 = hsl(hue2, 66, 26 + ((seed >> 3) % 12));        // nền sáng hơn (góc dưới-phải)
+  const glow = hsl(hue2, 80, 62);                           // ánh sáng spotlight
+  const ac = hsl((hue + 165 + (seed % 40)) % 360, 88, 70);  // accent tương phản
+  const uid = "g" + seed.toString(36);
+  const b1 = h32(id + "b1"), b2 = h32(id + "b2");
+  return `<svg viewBox="0 0 160 100" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" font-family="Inter,Arial">
+<defs>
+<linearGradient id="${uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c0}"/><stop offset="1" stop-color="${c1}"/></linearGradient>
+<radialGradient id="${uid}s" cx="0.5" cy="0.42" r="0.55"><stop offset="0" stop-color="${glow}" stop-opacity="0.35"/><stop offset="1" stop-color="${glow}" stop-opacity="0"/></radialGradient>
+<linearGradient id="${uid}c" x1="0" y1="0" x2="0" y2="1"><stop offset="0.45" stop-color="#000000" stop-opacity="0"/><stop offset="1" stop-color="#000000" stop-opacity="0.42"/></linearGradient>
+<pattern id="${uid}d" width="13" height="13" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="#ffffff" opacity="0.05"/></pattern>
+</defs>
+<rect width="160" height="100" fill="url(#${uid})"/>
+<rect width="160" height="100" fill="url(#${uid}d)"/>
+<circle cx="${8 + (b1 % 34)}" cy="${6 + (b1 >> 5) % 24}" r="${30 + (b1 % 14)}" fill="#ffffff" opacity="0.05"/>
+<circle cx="${120 + (b2 % 34)}" cy="${78 + (b2 >> 5) % 22}" r="${30 + (b2 % 16)}" fill="#000000" opacity="0.10"/>
+<rect width="160" height="100" fill="url(#${uid}s)"/>
+<g transform="translate(80 42) scale(1.18) translate(-80 -50)">${motif(classifyMotif(label, kind), ac)}</g>
+<rect width="160" height="100" fill="url(#${uid}c)"/>
+<rect x="12" y="84.5" width="16" height="3" rx="1.5" fill="${ac}"/>
+<text x="12" y="93" font-size="10" font-weight="800" letter-spacing="0.3" fill="#ffffff">${label}</text>
+</svg>`;
+}
+// Mẹo: luôn truyền `id` + `label` khác nhau giữa các bài để mỗi thumbnail một màu & bố cục riêng.

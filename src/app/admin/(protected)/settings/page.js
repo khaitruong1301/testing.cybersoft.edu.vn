@@ -1,0 +1,71 @@
+"use client";
+import { useEffect, useState } from "react";
+
+const FIELDS = [
+  ["access_days_old", "Thời hạn truy cập — học viên cũ (ngày)"],
+  ["access_days_unregistered", "Thời hạn truy cập — chưa đăng ký (ngày)"],
+  ["extend_days_old", "Gia hạn học viên cũ (ngày)"],
+  ["extend_days_unregistered", "Gia hạn khi đổi sang đã đăng ký (ngày)"],
+  ["quiz_mcq_count", "Số câu trắc nghiệm mỗi lượt luyện"],
+  ["quiz_essay_count", "Số câu tự luận mỗi lượt luyện"],
+  ["mock_question_count", "Số câu Mock Interview"],
+  ["mock_duration_min", "Thời gian làm bài Mock (phút)"],
+];
+
+export default function SettingsPage() {
+  const [settings, setSettings] = useState({});
+  const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/admin/settings")
+      .then((r) => r.json())
+      .then((d) => setSettings(d.settings || {}));
+  }, []);
+
+  async function save(e) {
+    e.preventDefault();
+    setLoading(true);
+    setSaved(false);
+    const r = await fetch("/api/admin/settings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(settings),
+    });
+    const d = await r.json();
+    setSettings(d.settings || settings);
+    setLoading(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  }
+
+  return (
+    <div>
+      <h1 className="mb-1 text-2xl font-extrabold text-slate-800">Cấu hình hệ thống</h1>
+      <p className="mb-6 text-sm text-slate-500">Mốc thời gian truy cập, gia hạn và số câu luyện tập / mock interview.</p>
+
+      <form onSubmit={save} className="max-w-2xl rounded-2xl bg-white p-5 shadow-sm">
+        <div className="grid gap-4 md:grid-cols-2">
+          {FIELDS.map(([key, label]) => (
+            <label key={key} className="block text-sm">
+              <span className="mb-1 block font-semibold text-slate-600">{label}</span>
+              <input
+                type="number"
+                min="0"
+                value={settings[key] ?? ""}
+                onChange={(e) => setSettings((s) => ({ ...s, [key]: e.target.value }))}
+                className="w-full rounded-lg border border-slate-200 px-3 py-2.5"
+              />
+            </label>
+          ))}
+        </div>
+        <div className="mt-5 flex items-center gap-3">
+          <button disabled={loading} className="rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-bold text-white disabled:opacity-60">
+            {loading ? "Đang lưu…" : "Lưu cấu hình"}
+          </button>
+          {saved && <span className="text-sm font-semibold text-emerald-600">✓ Đã lưu</span>}
+        </div>
+      </form>
+    </div>
+  );
+}
