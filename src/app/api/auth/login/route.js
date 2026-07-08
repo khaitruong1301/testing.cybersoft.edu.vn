@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createStudentSession } from "@/lib/session";
-import { getSettings, num } from "@/lib/settings";
+import { getSettings } from "@/lib/settings";
+import { computeAccessExpires } from "@/lib/access";
 
 // Student login for BOTH types.
 // Body: { email, phone, code, type: "OLD" | "UNREGISTERED" }
@@ -47,16 +48,12 @@ export async function POST(req) {
       return NextResponse.json({ error: "Tài khoản đã bị khoá." }, { status: 403 });
     }
 
-    // Set the access window from the FIRST login.
+    // Set the access window from the FIRST login (nguồn quy tắc: lib/access.js).
     // OLD students: PERMANENT access (accessExpires = null → never expires).
     // Unregistered: default 7 days. A day-count of 0 means permanent.
     if (!student.firstLoginAt) {
       const now = new Date();
-      const days =
-        student.type === "OLD"
-          ? num(settings.access_days_old, 0)
-          : num(settings.access_days_unregistered, 7);
-      const expires = days > 0 ? new Date(now.getTime() + days * 86400000) : null;
+      const expires = computeAccessExpires(student.type, settings, now);
       student = await prisma.student.update({
         where: { id: student.id },
         data: { firstLoginAt: now, accessExpires: expires },

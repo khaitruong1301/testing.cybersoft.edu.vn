@@ -3,10 +3,12 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboard() {
-  const [students, codes, activeStudents, articles, questions, attempts] = await Promise.all([
+  const [students, codes, activeStudents, branches, classes, articles, questions, attempts] = await Promise.all([
     prisma.student.count(),
     prisma.accessCode.count(),
     prisma.student.count({ where: { active: true } }),
+    prisma.branch.count(),
+    prisma.class.count(),
     prisma.article.count(),
     prisma.interviewQuestion.count(),
     prisma.attempt.count(),
@@ -19,6 +21,8 @@ export default async function AdminDashboard() {
     ["Học viên", students, "👥"],
     ["Đang hoạt động", activeStudents, "✅"],
     ["Hết hạn truy cập", expired, "⏰"],
+    ["Chi nhánh", branches, "🏢"],
+    ["Lớp học", classes, "🏫"],
     ["Mã đã sinh", codes, "🔑"],
     ["Bài tài liệu", articles, "📚"],
     ["Câu hỏi", questions, "🎤"],
@@ -42,8 +46,10 @@ export default async function AdminDashboard() {
       <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm">
         <h2 className="mb-2 font-bold text-slate-700">Bắt đầu nhanh</h2>
         <ol className="list-decimal space-y-1 pl-5 text-sm text-slate-600">
-          <li>Vào <b>Sinh mã (Excel)</b>: tải lên danh sách (tên, email, phone) → tải file mã về gửi học viên.</li>
-          <li>Vào <b>Học viên</b>: theo dõi thời hạn, gia hạn, đổi trạng thái đăng ký, khoá/mở.</li>
+          <li>Vào <b>Chi nhánh</b>: tạo danh sách chi nhánh CyberSoft.</li>
+          <li>Vào <b>Lớp học</b>: tạo lớp (tên, mã, lịch, chi nhánh) → mở chi tiết lớp để <b>ghi danh</b> hoặc <b>import Excel</b> học viên vào lớp. Ghi danh sẽ tự chuyển học viên thành “học viên cũ” (đủ quyền vĩnh viễn).</li>
+          <li>Vào <b>Học viên</b>: tìm/lọc theo lớp, sửa email/phone, gia hạn, khoá/mở. User chưa đăng ký chỉ dùng thử 7 ngày.</li>
+          <li>Vào <b>Sinh mã (Excel)</b>: cấp mã dùng thử/độc lập không gắn lớp (nếu cần).</li>
           <li>Vào <b>Cấu hình</b>: đổi mốc thời gian truy cập & số câu luyện/mock.</li>
         </ol>
       </div>

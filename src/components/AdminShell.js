@@ -4,8 +4,10 @@ import { usePathname, useRouter } from "next/navigation";
 
 const NAV = [
   { href: "/admin", label: "Tổng quan", icon: "📊" },
-  { href: "/admin/codes", label: "Sinh mã (Excel)", icon: "🔑" },
+  { href: "/admin/branches", label: "Chi nhánh", icon: "🏢" },
+  { href: "/admin/classes", label: "Lớp học", icon: "🏫" },
   { href: "/admin/students", label: "Học viên", icon: "👥" },
+  { href: "/admin/codes", label: "Sinh mã (Excel)", icon: "🔑" },
   { href: "/admin/settings", label: "Cấu hình", icon: "⚙️" },
 ];
 

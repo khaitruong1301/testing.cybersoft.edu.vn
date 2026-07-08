@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import crypto from "crypto";
 import { SignJWT, jwtVerify } from "jose";
 import { prisma } from "./prisma";
+import { hasAccess } from "./access";
 
 const STUDENT_COOKIE = "cst_session";
 const ADMIN_COOKIE = "cst_admin";
@@ -35,9 +36,8 @@ export async function getCurrentStudent() {
   });
   if (!session || session.expiresAt < new Date()) return null;
   const s = session.student;
-  if (!s || !s.active) return null;
-  // Enforce access window (counted from first login).
-  if (s.accessExpires && s.accessExpires < new Date()) return null;
+  // Kiểm khoá + cửa sổ truy cập (tính từ lần đăng nhập đầu) — nguồn: lib/access.js
+  if (!hasAccess(s)) return null;
   return s;
 }
 
