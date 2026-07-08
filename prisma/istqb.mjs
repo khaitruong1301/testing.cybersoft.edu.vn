@@ -2,6 +2,9 @@ import { B } from "./content.mjs";
 import { DATA as FOUNDATION } from "./bank_foundation.mjs";
 import { DATA as ADVANCED } from "./bank_advanced.mjs";
 import { DATA as EXPERT } from "./bank_expert.mjs";
+import { DATA as FOUNDATION_EXT } from "./bank_foundation_ext.mjs";
+import { DATA as ADVANCED_EXT } from "./bank_advanced_ext.mjs";
+import { DATA as EXPERT_EXT } from "./bank_expert_ext.mjs";
 
 // ============================================================================
 // ISTQB practice bank — 3 levels, 100 câu / level (300 câu), đủ 3 ngôn ngữ vi/en/ja.
@@ -20,6 +23,9 @@ const tag = (lvl, arr) => arr.map((d) => ({ lvl, q: d.q, options: d.options, ans
 
 export const ISTQB_MCQ = [
   ...tag("istqb-foundation", FOUNDATION),
+  ...tag("istqb-foundation", FOUNDATION_EXT),
   ...tag("istqb-advanced", ADVANCED),
+  ...tag("istqb-advanced", ADVANCED_EXT),
   ...tag("istqb-expert", EXPERT),
+  ...tag("istqb-expert", EXPERT_EXT),
 ];
