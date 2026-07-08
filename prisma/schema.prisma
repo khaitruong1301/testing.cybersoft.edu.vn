@@ -47,6 +47,7 @@ model Student {
   votes         Vote[]
   comments      Comment[]
   enrollments   Enrollment[]
+  loginCodes    LoginCode[]
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -135,6 +136,22 @@ model Session {
   createdAt DateTime @default(now())
 
   @@index([studentId])
+}
+
+// Mã đăng nhập OTP gửi qua email cho học viên cũ (thay mã admin cấp).
+// Mã 6 ký tự, hết hạn 5 phút, dùng 1 lần; tối đa 3 mã/ngày/học viên (đếm theo createdAt).
+model LoginCode {
+  id        String    @id @default(cuid())
+  student   Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId String
+  codeHash  String    // sha256(mã) — không lưu mã thô
+  expiresAt DateTime
+  usedAt    DateTime?
+  attempts  Int       @default(0) // số lần nhập sai (chặn dò mã)
+  createdAt DateTime  @default(now())
+
+  @@index([studentId])
+  @@index([createdAt])
 }
 
 // ---------------- Admin ----------------
