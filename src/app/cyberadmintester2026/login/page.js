@@ -20,7 +20,7 @@ export default function AdminLogin() {
     const d = await r.json();
     setLoading(false);
     if (!r.ok) setError(d.error || "Sai thông tin.");
-    else router.push("/admin");
+    else router.push("/cyberadmintester2026");
   }
 
   return (
@@ -60,7 +60,6 @@ export default function AdminLogin() {
         >
           {loading ? "…" : "Đăng nhập"}
         </button>
-        <p className="mt-3 text-center text-[11px] text-slate-400">Mặc định: admin@cybersoft.edu.vn / Admin@12345</p>
       </form>
     </div>
   );

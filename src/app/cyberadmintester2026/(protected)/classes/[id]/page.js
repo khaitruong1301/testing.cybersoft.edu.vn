@@ -95,13 +95,13 @@ export default function ClassDetailPage() {
   const fmt = (d) => (d ? new Date(d).toLocaleDateString("vi-VN") : "—");
 
   if (loading) return <p className="text-sm text-slate-400">Đang tải…</p>;
-  if (!klass) return <p className="text-sm text-rose-500">Không tìm thấy lớp. <Link href="/admin/classes" className="underline">Về danh sách lớp</Link></p>;
+  if (!klass) return <p className="text-sm text-rose-500">Không tìm thấy lớp. <Link href="/cyberadmintester2026/classes" className="underline">Về danh sách lớp</Link></p>;
 
   const batch = klass.code || klass.name;
 
   return (
     <div>
-      <Link href="/admin/classes" className="text-xs font-semibold text-slate-400 hover:underline">← Danh sách lớp</Link>
+      <Link href="/cyberadmintester2026/classes" className="text-xs font-semibold text-slate-400 hover:underline">← Danh sách lớp</Link>
       <div className="mt-2 mb-6 rounded-2xl bg-white p-5 shadow-sm">
         <h1 className="text-2xl font-extrabold text-slate-800">{klass.name}</h1>
         <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-500">

@@ -3,12 +3,12 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
 const NAV = [
-  { href: "/admin", label: "Tổng quan", icon: "📊" },
-  { href: "/admin/branches", label: "Chi nhánh", icon: "🏢" },
-  { href: "/admin/classes", label: "Lớp học", icon: "🏫" },
-  { href: "/admin/students", label: "Học viên", icon: "👥" },
-  { href: "/admin/codes", label: "Sinh mã (Excel)", icon: "🔑" },
-  { href: "/admin/settings", label: "Cấu hình", icon: "⚙️" },
+  { href: "/cyberadmintester2026", label: "Tổng quan", icon: "📊" },
+  { href: "/cyberadmintester2026/branches", label: "Chi nhánh", icon: "🏢" },
+  { href: "/cyberadmintester2026/classes", label: "Lớp học", icon: "🏫" },
+  { href: "/cyberadmintester2026/students", label: "Học viên", icon: "👥" },
+  { href: "/cyberadmintester2026/codes", label: "Sinh mã (Excel)", icon: "🔑" },
+  { href: "/cyberadmintester2026/settings", label: "Cấu hình", icon: "⚙️" },
 ];
 
 export default function AdminShell({ children, adminName }) {
@@ -17,7 +17,7 @@ export default function AdminShell({ children, adminName }) {
 
   async function logout() {
     await fetch("/api/admin/logout", { method: "POST" });
-    router.push("/admin/login");
+    router.push("/cyberadmintester2026/login");
   }
 
   return (
@@ -29,7 +29,7 @@ export default function AdminShell({ children, adminName }) {
         </div>
         <nav className="flex-1 space-y-1">
           {NAV.map((n) => {
-            const active = n.href === "/admin" ? pathname === "/admin" : pathname.startsWith(n.href);
+            const active = n.href === "/cyberadmintester2026" ? pathname === "/cyberadmintester2026" : pathname.startsWith(n.href);
             return (
               <Link
                 key={n.href}

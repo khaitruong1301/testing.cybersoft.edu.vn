@@ -66,6 +66,74 @@ export default function SettingsPage() {
           {saved && <span className="text-sm font-semibold text-emerald-600">✓ Đã lưu</span>}
         </div>
       </form>
+
+      <ChangePassword />
     </div>
+  );
+}
+
+function ChangePassword() {
+  const [cur, setCur] = useState("");
+  const [next, setNext] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [msg, setMsg] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  async function submit(e) {
+    e.preventDefault();
+    setError("");
+    setMsg("");
+    if (!cur || !next) return setError("Nhập mật khẩu hiện tại và mật khẩu mới.");
+    if (next.length < 8) return setError("Mật khẩu mới cần ít nhất 8 ký tự.");
+    if (next !== confirm) return setError("Xác nhận mật khẩu mới không khớp.");
+    setBusy(true);
+    const r = await fetch("/api/admin/change-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ currentPassword: cur, newPassword: next }),
+    });
+    const d = await r.json();
+    setBusy(false);
+    if (!r.ok) return setError(d.error || "Lỗi.");
+    setMsg("✓ Đã đổi mật khẩu. Lần đăng nhập sau dùng mật khẩu mới.");
+    setCur("");
+    setNext("");
+    setConfirm("");
+  }
+
+  return (
+    <form onSubmit={submit} className="mt-6 max-w-md space-y-3 rounded-2xl bg-white p-5 shadow-sm">
+      <h2 className="font-bold text-slate-700">Đổi mật khẩu admin</h2>
+      <input
+        type="password"
+        value={cur}
+        onChange={(e) => setCur(e.target.value)}
+        placeholder="Mật khẩu hiện tại"
+        autoComplete="current-password"
+        className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm"
+      />
+      <input
+        type="password"
+        value={next}
+        onChange={(e) => setNext(e.target.value)}
+        placeholder="Mật khẩu mới (≥ 8 ký tự)"
+        autoComplete="new-password"
+        className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm"
+      />
+      <input
+        type="password"
+        value={confirm}
+        onChange={(e) => setConfirm(e.target.value)}
+        placeholder="Xác nhận mật khẩu mới"
+        autoComplete="new-password"
+        className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm"
+      />
+      {error && <p className="rounded bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-600">{error}</p>}
+      {msg && <p className="rounded bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700">{msg}</p>}
+      <button disabled={busy} className="rounded-lg bg-slate-800 px-5 py-2.5 text-sm font-bold text-white disabled:opacity-60">
+        {busy ? "Đang đổi…" : "Đổi mật khẩu"}
+      </button>
+    </form>
   );
 }

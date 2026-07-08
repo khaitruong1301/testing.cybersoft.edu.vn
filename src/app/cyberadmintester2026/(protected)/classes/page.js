@@ -142,7 +142,7 @@ export default function ClassesPage() {
                 {classes.map((c) => (
                   <tr key={c.id} className="border-t border-slate-100 align-middle">
                     <td className="p-3">
-                      <Link href={`/admin/classes/${c.id}`} className="font-semibold text-brand-700 hover:underline">
+                      <Link href={`/cyberadmintester2026/classes/${c.id}`} className="font-semibold text-brand-700 hover:underline">
                         {c.name}
                       </Link>
                       <div className="text-xs text-slate-400">
@@ -154,7 +154,7 @@ export default function ClassesPage() {
                     <td className="text-xs text-slate-500">{fmt(c.createdAt)}</td>
                     <td className="p-3">
                       <div className="flex gap-1">
-                        <Link href={`/admin/classes/${c.id}`} className="rounded bg-brand-50 px-2 py-1 text-[11px] font-semibold text-brand-700">
+                        <Link href={`/cyberadmintester2026/classes/${c.id}`} className="rounded bg-brand-50 px-2 py-1 text-[11px] font-semibold text-brand-700">
                           Ghi danh
                         </Link>
                         <button onClick={() => remove(c)} className="rounded bg-rose-50 px-2 py-1 text-[11px] font-semibold text-rose-600">
