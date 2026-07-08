@@ -32,6 +32,15 @@ if (-not (Test-Path "$dest\.env")) {
   throw "Thieu $dest\.env - tao file .env production tren server truoc (xem .env.example)."
 }
 
+# --- 1b) Cap nhat web.config cua site IIS (reverse proxy + ep HTTPS + X-Forwarded-Proto) ---
+# Site IIS o thu muc RIENG (C:\apps\testing-site), khong nam trong deploy tree -> copy tu repo sang.
+$siteDir = "C:\apps\testing-site"
+if (Test-Path "$dest\deploy\web.config") {
+  New-Item -ItemType Directory -Force -Path $siteDir | Out-Null
+  Copy-Item "$dest\deploy\web.config" "$siteDir\web.config" -Force
+  Write-Host "==> Da cap nhat $siteDir\web.config (ep HTTPS)"
+}
+
 # --- 2) DUNG service truoc khi dung toi node_modules/.next (tranh loi EPERM do file bi khoa) ---
 Write-Host "==> Stop service 'testing' (giai phong lock)"
 & $nssm stop testing
