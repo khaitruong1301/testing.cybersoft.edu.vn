@@ -11,6 +11,7 @@ import { DATA as IV3B } from "./interview3_b.mjs";
 import { DATA as IV4 } from "./interview4.mjs";
 import { DATA as IV5 } from "./interview5.mjs";
 import { DATA as IV6 } from "./interview6.mjs";
+import { DATA as IV7 } from "./interview7.mjs";
 import { NEW_CATEGORIES, MORE_TOPICS } from "./topics2.mjs";
 import { ISTQB_LEVELS, ISTQB_MCQ } from "./istqb.mjs";
 import { PREMIUM_DOCS } from "./doc_premium.mjs";
@@ -96,7 +97,7 @@ const AI_DOCS = [
   ...AI_DOCS_06, ...AI_DOCS_07, ...AI_DOCS_08, ...AI_DOCS_09, ...AI_DOCS_10,
 ];
 
-const ALL_MCQ = [...MCQ, ...MCQ2, ...IV3A, ...IV3B, ...IV4, ...IV5, ...IV6];
+const ALL_MCQ = [...MCQ, ...MCQ2, ...IV3A, ...IV3B, ...IV4, ...IV5, ...IV6, ...IV7];
 const ALL_ESSAY = [...ESSAY, ...ESSAY2];
 const ALL_SCENARIO = [...SCENARIO, ...SCENARIO2];
 
