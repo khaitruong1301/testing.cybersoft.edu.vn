@@ -19,12 +19,15 @@ const TABS = [
   { href: "/mock", key: "nav_mock", icon: TargetIcon },
 ];
 
+// Thanh tab dưới (mobile): ĐỦ 6 menu chính (Hồ sơ đã có ở avatar góc phải).
+// short = nhãn rút gọn để 6 mục vừa khít, không rớt/đè.
 const MOBILE_TABS = [
   { href: "/", key: "nav_home", icon: HomeIcon },
   { href: "/documents", key: "nav_docs", icon: DocIcon },
+  { href: "/cv", key: "nav_cv", icon: CvIcon },
   { href: "/interview", key: "nav_interview", icon: ChatIcon },
-  { href: "/mock", key: "nav_mock", icon: TargetIcon },
-  { href: "/profile", key: "nav_profile", icon: UserIcon },
+  { href: "/istqb", key: "nav_istqb", icon: BadgeIcon },
+  { href: "/mock", key: "nav_mock", icon: TargetIcon, short: "Mock" },
 ];
 
 export default function AppShell({ children }) {
@@ -53,8 +56,8 @@ export default function AppShell({ children }) {
             <BrandLogo className="h-8 w-auto" />
           </Link>
 
-          {/* Inline nav — only when there's room (xl+) */}
-          <nav className="hidden min-w-0 flex-1 items-center gap-1 xl:flex">
+          {/* Inline nav — only when there's genuinely room (2xl+), tránh đè lên ô tìm kiếm */}
+          <nav className="hidden min-w-0 flex-1 items-center gap-1 2xl:flex">
             {TABS.map((tab) => {
               const Icon = tab.icon;
               const active = isActive(tab.href);
@@ -76,8 +79,8 @@ export default function AppShell({ children }) {
             <LangSwitch />
             <AuthButton student={student} t={t} router={router} />
 
-            {/* Hamburger menu — shows when inline nav is hidden (md → lg) */}
-            <div ref={menuRef} className="relative xl:hidden">
+            {/* Hamburger menu — shows when inline nav is hidden (md → xl) */}
+            <div ref={menuRef} className="relative 2xl:hidden">
               <button
                 onClick={() => setMenuOpen((v) => !v)}
                 aria-label="Menu"
@@ -135,12 +138,14 @@ export default function AppShell({ children }) {
             <Link
               key={tab.href}
               href={tab.href}
-              className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-bold transition ${
+              className={`flex min-w-0 flex-1 flex-col items-center gap-0.5 px-0.5 py-1.5 transition ${
                 active ? "text-brand-600" : "text-slate-500"
               }`}
             >
               <Icon active={active} />
-              {t(tab.key)}
+              <span className="w-full truncate text-center text-[10px] font-bold leading-tight">
+                {tab.short || t(tab.key)}
+              </span>
             </Link>
           );
         })}
