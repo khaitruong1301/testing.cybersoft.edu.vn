@@ -1,0 +1,61 @@
+name: OPS - Nap du lieu (seed) khong build, khong downtime
+
+# Dung khi CHI thay doi NOI DUNG (prisma/*.mjs: cau hoi, bai viet...).
+# Workflow nay:
+#   - KHONG stop service, KHONG npm ci, KHONG next build
+#   - KHONG dung toi .env, web.config, schema.prisma, node_modules, .next, dev.db
+#   - CHI copy cac file noi dung prisma/*.mjs roi chay `npm run db:seed`
+# seed.mjs thay cau hoi bang MOT transaction nguyen tu => nguoi dung khong thay downtime.
+#
+# Kich hoat: push vao nhanh 'ops-seed' (hoac bam Run workflow).
+on:
+  push:
+    branches: [ ops-seed ]
+  workflow_dispatch: {}
+
+concurrency:
+  group: seed-production
+  cancel-in-progress: false
+
+jobs:
+  seed:
+    name: Seed noi dung vao DB production
+    runs-on: [self-hosted, windows, testing]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy CHI file noi dung prisma/*.mjs
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Continue"
+          $dest = "C:\apps\testing"
+          if (-not (Test-Path "$dest\prisma")) { Write-Host "Khong thay $dest\prisma"; exit 1 }
+
+          # Chi copy *.mjs. KHONG dung: schema.prisma, dev.db, .env, node_modules, .next
+          robocopy "$env:GITHUB_WORKSPACE\prisma" "$dest\prisma" *.mjs /NFL /NDL /NJH /NJS /NP | Out-Null
+          if ($LASTEXITCODE -ge 8) { Write-Host "robocopy failed ($LASTEXITCODE)"; exit 1 }
+          $global:LASTEXITCODE = 0
+          Write-Host "==> Da dong bo prisma\*.mjs (chi noi dung)"
+
+      - name: Chay db:seed (non-destructive, atomic)
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Continue"
+          Set-Location "C:\apps\testing"
+          npm run db:seed
+          if ($LASTEXITCODE -ne 0) { Write-Host "!!! db seed FAILED"; exit 1 }
+          Write-Host "==> Seed xong."
+
+      - name: Health check (service van chay suot qua trinh)
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Continue"
+          try {
+            $r = Invoke-WebRequest -Uri "http://127.0.0.1:3210/istqb" -UseBasicParsing -TimeoutSec 30
+            Write-Host "HTTP $($r.StatusCode) /istqb"
+            if ($r.StatusCode -ne 200) { exit 1 }
+          } catch {
+            Write-Host "Health check FAIL: $($_.Exception.Message)"
+            exit 1
+          }
+          exit 0

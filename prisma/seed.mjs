@@ -303,6 +303,17 @@ async function main() {
   const PRUNE = process.env.SEED_PRUNE === "1";
   console.log(`Seeding CyberSoft Tester (upsert, non-destructive)${PRUNE ? " + PRUNE bật (sẽ xóa bài đã gỡ)" : ""}...`);
 
+  // SQLite: bật WAL để người dùng vẫn ĐỌC được trong lúc seed đang GHI (không bị
+  // "database is locked" -> không còn 502 ở /istqb, /interview khi seed chạy).
+  // Bỏ qua êm nếu DB không phải SQLite (vd Postgres).
+  try {
+    await prisma.$executeRawUnsafe("PRAGMA journal_mode=WAL;");
+    await prisma.$executeRawUnsafe("PRAGMA busy_timeout=15000;");
+    console.log("  SQLite: journal_mode=WAL, busy_timeout=15000");
+  } catch {
+    console.log("  (bỏ qua PRAGMA — DB không phải SQLite)");
+  }
+
   // ---- Admin ----
   const email = process.env.ADMIN_EMAIL || "admin@cybersoft.edu.vn";
   const password = process.env.ADMIN_PASSWORD || "Admin@12345";
@@ -329,7 +340,11 @@ async function main() {
   // không gắn dữ liệu người dùng nên tạo lại toàn bộ cho gọn.
   // Câu hỏi phỏng vấn/ISTQB KHÔNG gắn dữ liệu người dùng (Attempt lưu câu hỏi trong payload
   // riêng), nên tạo lại từ nguồn cho đồng bộ — không mất lịch sử làm bài của học viên.
-  await prisma.interviewQuestion.deleteMany();
+  //
+  // LƯU Ý: TRƯỚC ĐÂY ở đây có `interviewQuestion.deleteMany()`. Nó đã được CHUYỂN xuống
+  // sát chỗ chèn lại và gói trong MỘT transaction (xem "INTERVIEW + ISTQB questions").
+  // Lý do: xoá ở đây khiến bảng câu hỏi RỖNG suốt toàn bộ thời gian seed bài viết
+  // (hàng phút) -> /istqb và /interview lỗi. Giờ việc thay câu hỏi là nguyên tử.
   if (PRUNE) {
     // Chỉ khi yêu cầu: dọn bài cũ CHƯA có slug (di trú từ trước khi thêm cột slug).
     await prisma.article.deleteMany({ where: { slug: null } });
@@ -539,25 +554,7 @@ async function main() {
     });
     catMap[c.slug] = cat.id;
   }
-  const addQ = async (kind, item) => {
-    await prisma.interviewQuestion.create({
-      data: {
-        categoryId: catMap[item.cat] || Object.values(catMap)[0],
-        kind,
-        prompt: J(item.q),
-        options: kind === "MCQ" ? J(item.options) : "[]",
-        answer: kind === "MCQ" ? String(item.answer) : J(item.keywords || []),
-        explanation: J(item.exp),
-        difficulty: rand(1, 3),
-      },
-    });
-  };
-  for (const m of ALL_MCQ) await addQ("MCQ", m);
-  for (const e of ALL_ESSAY) await addQ("ESSAY", e);
-  for (const s of ALL_SCENARIO) await addQ("SCENARIO", s);
-  console.log(`  INTERVIEW: ${ALL_MCQ.length} MCQ, ${ALL_ESSAY.length} essay, ${ALL_SCENARIO.length} scenario`);
-
-  // ---- ISTQB tab: 3 levels ----
+  // ---- ISTQB tab: 3 levels (tạo category TRƯỚC, để chèn câu hỏi 1 lần duy nhất) ----
   const lvlMap = {};
   let lvlOrder = 0;
   for (const lv of ISTQB_LEVELS) {
@@ -568,16 +565,40 @@ async function main() {
     });
     lvlMap[lv.slug] = cat.id;
   }
-  for (const q of ISTQB_MCQ) {
-    await prisma.interviewQuestion.create({
-      data: {
-        categoryId: lvlMap[q.lvl] || Object.values(lvlMap)[0],
-        kind: "MCQ", prompt: J(q.q), options: J(q.options),
-        answer: String(q.answer), explanation: J(q.exp), difficulty: rand(1, 3),
-      },
-    });
-  }
+
+  // ---- INTERVIEW + ISTQB questions: THAY THẾ NGUYÊN TỬ ----
+  // Dựng sẵn toàn bộ hàng trong RAM, rồi xoá + chèn lại trong MỘT transaction.
+  // Nhờ vậy bảng câu hỏi không bao giờ rỗng với người đang dùng site (không downtime).
+  const rowIV = (kind, item) => ({
+    categoryId: catMap[item.cat] || Object.values(catMap)[0],
+    kind,
+    prompt: J(item.q),
+    options: kind === "MCQ" ? J(item.options) : "[]",
+    answer: kind === "MCQ" ? String(item.answer) : J(item.keywords || []),
+    explanation: J(item.exp),
+    difficulty: rand(1, 3),
+  });
+  const rowISTQB = (q) => ({
+    categoryId: lvlMap[q.lvl] || Object.values(lvlMap)[0],
+    kind: "MCQ", prompt: J(q.q), options: J(q.options),
+    answer: String(q.answer), explanation: J(q.exp), difficulty: rand(1, 3),
+  });
+
+  const questionRows = [
+    ...ALL_MCQ.map((m) => rowIV("MCQ", m)),
+    ...ALL_ESSAY.map((e) => rowIV("ESSAY", e)),
+    ...ALL_SCENARIO.map((s) => rowIV("SCENARIO", s)),
+    ...ISTQB_MCQ.map(rowISTQB),
+  ];
+
+  await prisma.$transaction([
+    prisma.interviewQuestion.deleteMany(),
+    ...questionRows.map((data) => prisma.interviewQuestion.create({ data })),
+  ]);
+
+  console.log(`  INTERVIEW: ${ALL_MCQ.length} MCQ, ${ALL_ESSAY.length} essay, ${ALL_SCENARIO.length} scenario`);
   console.log(`  ISTQB: ${ISTQB_LEVELS.length} levels, ${ISTQB_MCQ.length} questions`);
+  console.log(`  -> Thay thế nguyên tử ${questionRows.length} câu hỏi (1 transaction, không downtime)`);
 
   // ---- Dọn nội dung đã gỡ — CHỈ chạy khi SEED_PRUNE=1 (tường minh yêu cầu) ----
   // KHÔNG đụng tới student/session/accessCode/bookmark trong mọi trường hợp.
