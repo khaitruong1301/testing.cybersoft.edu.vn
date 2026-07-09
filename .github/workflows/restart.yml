@@ -1,0 +1,58 @@
+name: OPS - Restart service (khong build)
+
+# Workflow CUU HO: chi start lai Windows service "testing" tren self-hosted runner.
+# KHONG checkout, KHONG npm ci, KHONG build, KHONG seed => chay trong vai giay.
+# Kich hoat bang cach push vao nhanh 'ops-restart' (hoac bam Run workflow).
+on:
+  push:
+    branches: [ ops-restart ]
+  workflow_dispatch: {}
+
+jobs:
+  restart:
+    name: Start service testing
+    runs-on: [self-hosted, windows, testing]
+    steps:
+      - name: Start service
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Continue"
+          $nssm = "C:\apps\testing\_bin\nssm.exe"
+          if (-not (Test-Path $nssm)) { Write-Host "Khong thay $nssm"; exit 1 }
+
+          Write-Host "==> Trang thai truoc:"
+          & $nssm status testing
+          $global:LASTEXITCODE = 0
+
+          Write-Host "==> nssm start testing"
+          & $nssm start testing
+          $global:LASTEXITCODE = 0
+          Start-Sleep -Seconds 10
+
+          Write-Host "==> Trang thai sau:"
+          & $nssm status testing
+          $global:LASTEXITCODE = 0
+          exit 0
+
+      - name: Health check 127.0.0.1:3210
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Continue"
+          $ok = $false
+          foreach ($i in 1..6) {
+            try {
+              $r = Invoke-WebRequest -Uri "http://127.0.0.1:3210/" -UseBasicParsing -TimeoutSec 20
+              Write-Host "Lan ${i}: HTTP $($r.StatusCode)"
+              if ($r.StatusCode -eq 200) { $ok = $true; break }
+            } catch {
+              Write-Host "Lan ${i}: chua len ($($_.Exception.Message))"
+            }
+            Start-Sleep -Seconds 10
+          }
+          if (-not $ok) {
+            Write-Host "!!! Service chua tra 200. Co the .next hong do build dut giua chung."
+            Write-Host "    Chay tay tren server: cd C:\apps\testing ; npm run build ; nssm restart testing"
+            exit 1
+          }
+          Write-Host "==> OK: site da len lai."
+          exit 0
