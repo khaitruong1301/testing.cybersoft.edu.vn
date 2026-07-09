@@ -66,7 +66,7 @@ import { AIAGENT_10 } from "./doc_aiagent_10.mjs";
 import { AIAGENT_11 } from "./doc_aiagent_11.mjs";
 import { BEGINNER_MANUAL_DOCS } from "./doc_beginner_manual.mjs";
 import { BEGINNER_MANUAL_ENT_DOCS } from "./doc_beginner_manual_enterprise.mjs";
-import { MANUAL_ADV_01 } from "./doc_manual_advanced_01.mjs";
+import { MANUAL_STATE_01 } from "./doc_manual_state_transition.mjs";
 
 // 21 bài "AI Agent trong Testing" mới (chuẩn Testing_BaiViet, SEO/GEO) — thay 5 bài định dạng cũ.
 const AIAGENT_DOCS = [
@@ -384,7 +384,7 @@ async function main() {
   // ---- MANUAL TESTING: bài NGƯỜI MỚI + NÂNG CAO (practice-first · quiz · SEO · level tăng dần) ----
   // Gồm 5 bài nền tảng + 5 bài thực hành doanh nghiệp + 5 bài trung cấp (kỹ thuật thiết kế ca & tích hợp).
   if (docCatMap["manual-testing"]) {
-    const MANUAL_ALL = [...BEGINNER_MANUAL_DOCS, ...BEGINNER_MANUAL_ENT_DOCS, ...MANUAL_ADV_01];
+    const MANUAL_ALL = [...BEGINNER_MANUAL_DOCS, ...BEGINNER_MANUAL_ENT_DOCS, ...MANUAL_STATE_01];
     let mo = 1;
     for (const doc of MANUAL_ALL) {
       await createArticle(docCatMap["manual-testing"], mo++, {
@@ -392,7 +392,7 @@ async function main() {
         level: doc.level, seo: doc.seo, pages: doc.pages,
       });
     }
-    console.log(`  MANUAL TESTING docs: ${MANUAL_ALL.length} (nền tảng ${BEGINNER_MANUAL_DOCS.length} + doanh nghiệp ${BEGINNER_MANUAL_ENT_DOCS.length} + trung cấp ${MANUAL_ADV_01.length})`);
+    console.log(`  MANUAL TESTING docs: ${MANUAL_ALL.length} (nền tảng ${BEGINNER_MANUAL_DOCS.length} + doanh nghiệp ${BEGINNER_MANUAL_ENT_DOCS.length} + trung cấp ${MANUAL_STATE_01.length})`);
   }
 
   // ---- Playwright PRO: 10 bài focused theo chuẩn mới (thay cho bài cơ bản) ----
