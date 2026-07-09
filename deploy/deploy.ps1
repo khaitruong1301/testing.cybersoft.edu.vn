@@ -47,11 +47,24 @@ Write-Host "==> Stop service 'testing' (giai phong lock)"
 Start-Sleep -Seconds 3
 
 # --- 3) Cai dat + build trong dest (dung .env cua server) ---
+# QUAN TRONG: moi buoc nang nam trong try/catch. Du buoc nao that bai, khoi 'finally'
+# VAN start lai service => site khong bao gio nam down vo thoi han (quay ve ban build cu).
+$deployError = $null
+$lockStamp = "$dest\_bin\package-lock.sha"
 Push-Location $dest
 try {
-  Write-Host "==> npm ci"
-  npm ci
-  if ($LASTEXITCODE -ne 0) { throw "npm ci failed" }
+  # Chi chay 'npm ci' khi package-lock.json thuc su doi. Deploy chi doi noi dung
+  # (prisma/*.mjs) se bo qua buoc nay -> khong xoa node_modules, nhanh & an toan hon.
+  $lockHash = (Get-FileHash "$dest\package-lock.json" -Algorithm SHA256).Hash
+  $prevHash = ""
+  if (Test-Path $lockStamp) { $prevHash = (Get-Content $lockStamp -Raw).Trim() }
+  if ($lockHash -ne $prevHash) {
+    Write-Host "==> npm ci (package-lock thay doi)"
+    npm ci
+    if ($LASTEXITCODE -ne 0) { throw "npm ci failed" }
+  } else {
+    Write-Host "==> Bo qua npm ci (package-lock khong doi)"
+  }
 
   Write-Host "==> prisma generate + db push"
   npx prisma generate
@@ -66,15 +79,27 @@ try {
   Write-Host "==> next build"
   npm run build
   if ($LASTEXITCODE -ne 0) { throw "next build failed" }
+
+  New-Item -ItemType Directory -Force -Path "$dest\_bin" | Out-Null
+  Set-Content -Path $lockStamp -Value $lockHash -Encoding ascii
+}
+catch {
+  $deployError = $_
+  Write-Host "!!! DEPLOY THAT BAI: $($_.Exception.Message)"
 }
 finally {
   Pop-Location
+  # LUON start lai service, ke ca khi deploy that bai.
+  Write-Host "==> Start service 'testing' (luon chay, ke ca khi deploy loi)"
+  & $nssm start testing
+  Start-Sleep -Seconds 8
 }
 
-# --- 4) Start service + health check ---
-Write-Host "==> Start service 'testing'"
-& $nssm start testing
-Start-Sleep -Seconds 8
+if ($deployError) {
+  throw "Deploy that bai (service da duoc start lai bang ban build cu): $($deployError.Exception.Message)"
+}
+
+# --- 4) Health check ---
 
 Write-Host "==> Health check http://127.0.0.1:$port/"
 try {
