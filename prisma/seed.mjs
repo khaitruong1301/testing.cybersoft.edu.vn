@@ -68,6 +68,7 @@ import { BEGINNER_MANUAL_DOCS } from "./doc_beginner_manual.mjs";
 import { BEGINNER_MANUAL_ENT_DOCS } from "./doc_beginner_manual_enterprise.mjs";
 import { MANUAL_STATE_01 } from "./doc_manual_state_transition.mjs";
 import { MANUAL_BEGINNER_DEFECT_01 } from "./doc_manual_beginner_defect_lifecycle.mjs";
+import { MANUAL_BEGINNER_SEVPRI_01 } from "./doc_manual_beginner_severity_priority.mjs";
 
 // 21 bài "AI Agent trong Testing" mới (chuẩn Testing_BaiViet, SEO/GEO) — thay 5 bài định dạng cũ.
 const AIAGENT_DOCS = [
@@ -385,7 +386,7 @@ async function main() {
   // ---- MANUAL TESTING: bài NGƯỜI MỚI + NÂNG CAO (practice-first · quiz · SEO · level tăng dần) ----
   // Gồm 5 bài nền tảng + 5 bài thực hành doanh nghiệp + 5 bài trung cấp (kỹ thuật thiết kế ca & tích hợp).
   if (docCatMap["manual-testing"]) {
-    const MANUAL_ALL = [...BEGINNER_MANUAL_DOCS, ...BEGINNER_MANUAL_ENT_DOCS, ...MANUAL_BEGINNER_DEFECT_01, ...MANUAL_STATE_01];
+    const MANUAL_ALL = [...BEGINNER_MANUAL_DOCS, ...BEGINNER_MANUAL_ENT_DOCS, ...MANUAL_BEGINNER_DEFECT_01, ...MANUAL_BEGINNER_SEVPRI_01, ...MANUAL_STATE_01];
     let mo = 1;
     for (const doc of MANUAL_ALL) {
       await createArticle(docCatMap["manual-testing"], mo++, {
