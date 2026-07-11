@@ -1,0 +1,71 @@
+name: OPS - Don bai viet TRUNG (dedup, an toan)
+
+# Chay khi CAN DON cac bai viet bi trung (cung tieu de) do lan nap sai slug tao ra.
+#   1. Push len nhanh 'ops-dedup' (hoac Run workflow)
+#   2. Workflow copy CHI prisma/dedup_docs.mjs -> chay dry-run -> chay APPLY
+#
+# AN TOAN: chi xoa ban trung co engagement == 0 (khong bookmark/vote/comment/view).
+# KHONG stop service, KHONG build, KHONG dung file khac.
+on:
+  push:
+    branches: [ ops-dedup ]
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "Thuc thi xoa? (1 = xoa that, 0 = chi dry-run)"
+        required: false
+        default: "1"
+
+concurrency:
+  group: docs-production
+  cancel-in-progress: false
+
+jobs:
+  dedup:
+    name: Don bai viet trung trong DB production
+    runs-on: [self-hosted, windows, testing]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy CHI prisma/dedup_docs.mjs
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Continue"
+          $dest = "C:\apps\testing"
+          if (-not (Test-Path "$dest\prisma")) { Write-Host "Khong thay $dest\prisma"; exit 1 }
+          robocopy "$env:GITHUB_WORKSPACE\prisma" "$dest\prisma" dedup_docs.mjs /NFL /NDL /NJH /NJS /NP | Out-Null
+          if ($LASTEXITCODE -ge 8) { Write-Host "robocopy failed ($LASTEXITCODE)"; exit 1 }
+          $global:LASTEXITCODE = 0
+          Write-Host "==> Da copy dedup_docs.mjs"
+
+      - name: Dry-run (luon chay, chi in)
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Continue"
+          Set-Location "C:\apps\testing"
+          $env:DEDUP_APPLY = "0"
+          node prisma\dedup_docs.mjs
+          if ($LASTEXITCODE -ne 0) { Write-Host "!!! dry-run FAILED"; exit 1 }
+
+      - name: Apply (xoa ban trung, an toan)
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Continue"
+          Set-Location "C:\apps\testing"
+          $env:DEDUP_APPLY = if ("${{ github.event.inputs.apply }}" -eq "0") { "0" } else { "1" }
+          node prisma\dedup_docs.mjs
+          if ($LASTEXITCODE -ne 0) { Write-Host "!!! dedup FAILED"; exit 1 }
+          Write-Host "==> Dedup xong."
+
+      - name: Health check (/documents van 200)
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Continue"
+          try {
+            $r = Invoke-WebRequest -Uri "http://127.0.0.1:3210/documents" -UseBasicParsing -TimeoutSec 30
+            Write-Host "HTTP $($r.StatusCode) /documents"
+            if ($r.StatusCode -ne 200) { exit 1 }
+          } catch {
+            Write-Host "Health check FAIL: $($_.Exception.Message)"; exit 1
+          }
+          exit 0
