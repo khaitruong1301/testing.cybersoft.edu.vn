@@ -1,0 +1,83 @@
+name: OPS - Them tai lieu (incremental, khong seed lai)
+
+# Quy trinh khi CHI THEM/SUA BAI VIET:
+#   1. Sua/them noi dung trong prisma/doc_*.mjs (+ khai bao trong prisma/sync_docs.mjs -> SOURCES)
+#   2. Push len nhanh 'ops-docs'
+#   3. Workflow nay chay `node prisma/sync_docs.mjs` -> CHI CHEN BAI MOI / CAP NHAT BAI DOI
+#
+# KHONG stop service, KHONG npm ci, KHONG next build, KHONG seed lai cau hoi.
+# KHONG dung: .env, schema.prisma, web.config, next.config.mjs, dev.db, node_modules, .next
+#
+# An toan: bai viet upsert theo `slug` -> giu nguyen id, viewCount, bookmark, vote, comment.
+# PRUNE mac dinh TAT (khong bao gio tu xoa bai).
+on:
+  push:
+    branches: [ ops-docs ]
+  workflow_dispatch:
+    inputs:
+      dry:
+        description: "Chay thu, khong ghi? (1 = dry run)"
+        required: false
+        default: "0"
+      prune:
+        description: "Don bai da go khoi nguon? (1 = xoa, CASCADE mat bookmark/vote) - mac dinh 0"
+        required: false
+        default: "0"
+
+concurrency:
+  group: docs-production
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Chen bai viet moi vao DB production
+    runs-on: [self-hosted, windows, testing]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy CHI file noi dung prisma/*.mjs
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Continue"
+          $dest = "C:\apps\testing"
+          if (-not (Test-Path "$dest\prisma")) { Write-Host "Khong thay $dest\prisma"; exit 1 }
+
+          # Chi copy *.mjs. KHONG dung: schema.prisma, dev.db, .env, node_modules, .next
+          robocopy "$env:GITHUB_WORKSPACE\prisma" "$dest\prisma" *.mjs /NFL /NDL /NJH /NJS /NP | Out-Null
+          if ($LASTEXITCODE -ge 8) { Write-Host "robocopy failed ($LASTEXITCODE)"; exit 1 }
+          $global:LASTEXITCODE = 0
+          Write-Host "==> Da dong bo prisma\*.mjs (chi noi dung)"
+
+      - name: Dry-run truoc (luon chay, khong ghi gi)
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Continue"
+          Set-Location "C:\apps\testing"
+          $env:SYNC_DRY = "1"
+          node prisma\sync_docs.mjs
+          if ($LASTEXITCODE -ne 0) { Write-Host "!!! dry-run FAILED"; exit 1 }
+
+      - name: Chay sync_docs (incremental, atomic)
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Continue"
+          Set-Location "C:\apps\testing"
+          $env:SYNC_DRY = if ("${{ github.event.inputs.dry }}" -eq "1") { "1" } else { "0" }
+          $env:SYNC_PRUNE = if ("${{ github.event.inputs.prune }}" -eq "1") { "1" } else { "0" }
+          node prisma\sync_docs.mjs
+          if ($LASTEXITCODE -ne 0) { Write-Host "!!! sync_docs FAILED"; exit 1 }
+          Write-Host "==> Sync docs xong."
+
+      - name: Health check (service van chay suot qua trinh)
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Continue"
+          try {
+            $r = Invoke-WebRequest -Uri "http://127.0.0.1:3210/documents" -UseBasicParsing -TimeoutSec 30
+            Write-Host "HTTP $($r.StatusCode) /documents"
+            if ($r.StatusCode -ne 200) { exit 1 }
+          } catch {
+            Write-Host "Health check FAIL: $($_.Exception.Message)"
+            exit 1
+          }
+          exit 0

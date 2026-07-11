@@ -87,6 +87,7 @@ export const TAG = {
   advanced: { k: "advanced", vi: "Nâng cao", en: "Advanced", ja: "上級", g: "type" },
   seo: { k: "seo", vi: "Chuẩn SEO", en: "SEO-optimized", ja: "SEO最適化", g: "type" },
   beginner: { k: "beginner", vi: "Người mới", en: "Beginner", ja: "初心者", g: "type" },
+  intermediate: { k: "intermediate", vi: "Trung cấp", en: "Intermediate", ja: "中級", g: "type" },
 };
 
 export const tags = (...keys) => keys.map((k) => TAG[k]).filter(Boolean);
