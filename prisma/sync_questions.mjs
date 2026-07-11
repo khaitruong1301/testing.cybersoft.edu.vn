@@ -30,19 +30,40 @@ import { DATA as IV4 } from "./interview4.mjs";
 import { DATA as IV5 } from "./interview5.mjs";
 import { DATA as IV6 } from "./interview6.mjs";
 import { DATA as IV7 } from "./interview7.mjs";
+import { DATA as IV8 } from "./interview8.mjs";
+import { DATA as IV9 } from "./interview9.mjs";
 import { ISTQB_LEVELS, ISTQB_MCQ } from "./istqb.mjs";
 
 const prisma = new PrismaClient();
 const J = (o) => JSON.stringify(o);
-const PRUNE = process.env.SYNC_PRUNE !== "0";
+// MẶC ĐỊNH ADDITIVE-ONLY: chỉ chèn câu mới, KHÔNG xoá gì.
+// Prune (dọn câu không còn trong nguồn) phải bật RÕ RÀNG: SYNC_PRUNE=1.
+const PRUNE = process.env.SYNC_PRUNE === "1";
 const DRY = process.env.SYNC_DRY === "1";
 
-// id tất định: đổi 1 ký tự trong câu hỏi -> id khác -> coi như câu mới.
+// id tất định cho CÂU MỚI (chỉ để đặt khóa chính, KHÔNG dùng để so trùng).
 const makeId = (categorySlug, kind, prompt, options, answer) =>
   "q_" + crypto.createHash("sha256")
     .update([categorySlug, kind, J(prompt), options, String(answer)].join("|"))
     .digest("hex")
     .slice(0, 40);
+
+// ----------------------------------------------------------------------------
+// SO TRÙNG THEO NỘI DUNG (content-aware) — an toàn cho Postgres.
+// Dữ liệu production (di trú từ SQLite) mang id cuid, KHÔNG phải hash nội dung.
+// Vì thế so theo id sẽ hiểu nhầm mọi câu là "mới" -> nhân đôi (PRUNE=0) hoặc
+// xoá sạch rồi dựng lại (PRUNE=1). Ta so theo KHÓA NỘI DUNG:
+//   category-slug | kind | prompt.vi đã chuẩn hoá
+// -> câu đã có (dù id cuid) vẫn nhận ra được -> chỉ chèn câu THỰC SỰ mới.
+const norm = (s) => String(s == null ? "" : s)
+  .normalize("NFC").replace(/\s+/g, " ").trim().toLowerCase();
+// Lấy prompt.vi từ object {vi,en,ja} hoặc từ chuỗi JSON đã lưu trong DB.
+const promptVi = (p) => {
+  if (p && typeof p === "object") return p.vi ?? "";
+  try { return (JSON.parse(p) || {}).vi ?? ""; } catch { return ""; }
+};
+const contentKey = (slug, kind, promptObjOrJson) =>
+  `${slug}|${kind}|${norm(promptVi(promptObjOrJson))}`;
 
 async function main() {
   console.log(`Sync questions (incremental)${DRY ? " [DRY RUN]" : ""}${PRUNE ? "" : " [chỉ thêm, không xoá]"}...`);
@@ -89,11 +110,12 @@ async function main() {
     const answer = kind === "MCQ" ? String(item.answer) : J(item.keywords || []);
     rows.push({
       id: makeId(slug, kind, item.q, options, answer),
+      key: contentKey(slug, kind, item.q),
       categoryId: catId[slug], kind, prompt: J(item.q), options, answer,
       explanation: J(item.exp), difficulty: 1,
     });
   };
-  for (const m of [...MCQ, ...MCQ2, ...IV3A, ...IV3B, ...IV4, ...IV5, ...IV6, ...IV7]) addIV("MCQ", m);
+  for (const m of [...MCQ, ...MCQ2, ...IV3A, ...IV3B, ...IV4, ...IV5, ...IV6, ...IV7, ...IV8, ...IV9]) addIV("MCQ", m);
   for (const e of [...ESSAY, ...ESSAY2]) addIV("ESSAY", e);
   for (const s of [...SCENARIO, ...SCENARIO2]) addIV("SCENARIO", s);
   for (const q of ISTQB_MCQ) {
@@ -102,37 +124,49 @@ async function main() {
     const options = J(q.options);
     rows.push({
       id: makeId(slug, "MCQ", q.q, options, String(q.answer)),
+      key: contentKey(slug, "MCQ", q.q),
       categoryId: catId[slug], kind: "MCQ", prompt: J(q.q), options,
       answer: String(q.answer), explanation: J(q.exp), difficulty: 1,
     });
   }
 
-  // Chống trùng id trong chính nguồn (2 câu y hệt nhau).
+  // Chống trùng NỘI DUNG trong chính nguồn (2 câu cùng category+kind+prompt.vi).
   const seen = new Set();
   const wanted = [];
   let dupes = 0;
   for (const r of rows) {
-    if (seen.has(r.id)) { dupes++; continue; }
-    seen.add(r.id); wanted.push(r);
+    if (seen.has(r.key)) { dupes++; continue; }
+    seen.add(r.key); wanted.push(r);
   }
-  if (dupes) console.log(`  (bỏ ${dupes} câu trùng lặp y hệt trong nguồn)`);
+  if (dupes) console.log(`  (bỏ ${dupes} câu trùng nội dung trong nguồn)`);
 
-  // --- 3) So sánh với DB: chỉ lấy id, rất nhẹ ---
+  // --- 3) So sánh với DB THEO NỘI DUNG (không theo id) ---
+  //   idToSlug: đổi ngược categoryId -> slug để dựng khóa nội dung cho hàng DB.
+  const idToSlug = Object.fromEntries(Object.entries(catId).map(([slug, id]) => [id, slug]));
   const managedCatIds = Object.values(catId);
   const existing = await prisma.interviewQuestion.findMany({
     where: { categoryId: { in: managedCatIds } },
-    select: { id: true },
+    select: { id: true, categoryId: true, kind: true, prompt: true },
   });
-  const existingIds = new Set(existing.map((e) => e.id));
+  const existingKeys = new Set(
+    existing.map((e) => contentKey(idToSlug[e.categoryId] || "?", e.kind, e.prompt))
+  );
 
-  const toInsert = wanted.filter((r) => !existingIds.has(r.id));
-  const wantedIds = new Set(wanted.map((r) => r.id));
-  const toDelete = existing.filter((e) => !wantedIds.has(e.id)).map((e) => e.id);
+  // Chỉ chèn câu có KHÓA NỘI DUNG chưa tồn tại trong DB. KHÔNG bao giờ đụng câu cũ.
+  const toInsert = wanted.filter((r) => !existingKeys.has(r.key));
+
+  // PRUNE (mặc định TẮT): chỉ liệt kê câu trong DB không còn trong nguồn — KHÔNG xoá,
+  // trừ khi bật rõ SYNC_PRUNE=1. Ngay cả khi bật, prune theo nội dung để không xoá nhầm.
+  const wantedKeys = new Set(wanted.map((r) => r.key));
+  const toDelete = existing.filter((e) => !wantedKeys.has(contentKey(idToSlug[e.categoryId] || "?", e.kind, e.prompt))).map((e) => e.id);
 
   console.log(`  Nguồn: ${wanted.length} câu | DB đang có: ${existing.length}`);
-  console.log(`  -> CHÈN MỚI: ${toInsert.length}`);
-  console.log(`  -> DỌN (không còn trong nguồn): ${PRUNE ? toDelete.length : 0}${PRUNE ? "" : ` (bỏ qua ${toDelete.length})`}`);
-  console.log(`  -> GIỮ NGUYÊN: ${wanted.length - toInsert.length}`);
+  console.log(`  -> CHÈN MỚI (nội dung chưa có): ${toInsert.length}`);
+  console.log(`  -> GIỮ NGUYÊN (đã có, khớp nội dung): ${wanted.length - toInsert.length}`);
+  console.log(`  -> Trong DB nhưng không có trong nguồn: ${toDelete.length}${PRUNE ? " -> SẼ DỌN (SYNC_PRUNE=1)" : " (GIỮ LẠI — additive-only)"}`);
+
+  // Cache mỗi hàng insert bỏ trường phụ `key` trước khi ghi.
+  const stripKey = ({ key, ...data }) => data;
 
   if (DRY) { console.log("DRY RUN — không ghi gì."); return; }
   if (!toInsert.length && (!PRUNE || !toDelete.length)) {
@@ -145,7 +179,7 @@ async function main() {
   if (PRUNE && toDelete.length) {
     ops.push(prisma.interviewQuestion.deleteMany({ where: { id: { in: toDelete } } }));
   }
-  for (const data of toInsert) ops.push(prisma.interviewQuestion.create({ data }));
+  for (const data of toInsert) ops.push(prisma.interviewQuestion.create({ data: stripKey(data) }));
   await prisma.$transaction(ops);
 
   // --- 5) Báo cáo sau khi ghi ---

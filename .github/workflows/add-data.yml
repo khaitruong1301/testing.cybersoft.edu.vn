@@ -13,9 +13,9 @@ on:
   workflow_dispatch:
     inputs:
       prune:
-        description: "Don cau da go khoi nguon? (0 = chi them, khong xoa)"
+        description: "Don cau da go khoi nguon? (0 = chi them, khong xoa) - MAC DINH 0 an toan"
         required: false
-        default: "1"
+        default: "0"
       dry:
         description: "Chay thu, khong ghi? (1 = dry run)"
         required: false
@@ -46,7 +46,7 @@ jobs:
       - name: Sync cau hoi (incremental, atomic)
         shell: powershell
         env:
-          SYNC_PRUNE: ${{ github.event.inputs.prune || '1' }}
+          SYNC_PRUNE: ${{ github.event.inputs.prune || '0' }}
           SYNC_DRY: ${{ github.event.inputs.dry || '0' }}
         run: |
           $ErrorActionPreference = "Continue"
