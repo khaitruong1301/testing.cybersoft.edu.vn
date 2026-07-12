@@ -58,12 +58,14 @@ import { MB_A11Y_01 } from "./doc_mb_accessibility.mjs";
 // --- Manual / Nâng cao (advanced) ---
 import { MA_ERRORGUESS_01 } from "./doc_ma_error_guessing.mjs";
 import { MA_RISKBASED_01 } from "./doc_ma_risk_based.mjs";
+import { MA_USECASE_01 } from "./doc_ma_use_case.mjs";
+import { MA_DOMAIN_01 } from "./doc_ma_domain_analysis.mjs";
 
 const SOURCES = [
   {
     categorySlug: "manual-testing",
     startOrder: 1, // seed.mjs: `let mo = 1`
-    docs: [...BEGINNER_MANUAL_DOCS, ...BEGINNER_MANUAL_ENT_DOCS, ...MANUAL_BEGINNER_DEFECT_01, ...MANUAL_BEGINNER_SEVPRI_01, ...MANUAL_BEGINNER_NEGATIVE_01, ...MB_TEST_DATA_01, ...MB_YEUCAU_01, ...MB_DANGNHAP_01, ...MB_TIMKIEM_01, ...MB_TESTREPORT_01, ...MB_GIOHANG_01, ...MB_UPLOAD_01, ...MB_THONGBAO_01, ...MB_EMAILOTP_01, ...MB_PHANTRANG_01, ...MB_DANGONNGU_01, ...MB_PHANQUYEN_01, ...MB_RESETPW_01, ...MB_SMOKESANITY_01, ...MB_JIRA_01, ...MB_USABILITY_01, ...MB_A11Y_01, ...MA_ERRORGUESS_01, ...MA_RISKBASED_01, ...MANUAL_ADV_01, ...MANUAL_STATE_01],
+    docs: [...BEGINNER_MANUAL_DOCS, ...BEGINNER_MANUAL_ENT_DOCS, ...MANUAL_BEGINNER_DEFECT_01, ...MANUAL_BEGINNER_SEVPRI_01, ...MANUAL_BEGINNER_NEGATIVE_01, ...MB_TEST_DATA_01, ...MB_YEUCAU_01, ...MB_DANGNHAP_01, ...MB_TIMKIEM_01, ...MB_TESTREPORT_01, ...MB_GIOHANG_01, ...MB_UPLOAD_01, ...MB_THONGBAO_01, ...MB_EMAILOTP_01, ...MB_PHANTRANG_01, ...MB_DANGONNGU_01, ...MB_PHANQUYEN_01, ...MB_RESETPW_01, ...MB_SMOKESANITY_01, ...MB_JIRA_01, ...MB_USABILITY_01, ...MB_A11Y_01, ...MA_ERRORGUESS_01, ...MA_RISKBASED_01, ...MA_USECASE_01, ...MA_DOMAIN_01, ...MANUAL_ADV_01, ...MANUAL_STATE_01],
   },
 ];
 
