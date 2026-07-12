@@ -1,0 +1,36 @@
+name: OPS - Thu thap cong nghe moi (tu dong viet bai)
+
+# Chay dinh ky (~2-3 ngay/lan: Thu 2 & Thu 5, 01:00 UTC = 08:00 VN) tren self-hosted runner.
+# Dung Claude API (web search) sinh 1 bai "Cong nghe moi nhat" roi insert thang vao Postgres.
+# KHONG build lai, KHONG seed lai. Idempotent theo slug.
+# Yeu cau: GitHub secret ANTHROPIC_API_KEY. DATABASE_URL doc tu C:\apps\testing\.env.
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: "0 1 * * 1,4"
+
+concurrency:
+  group: data-production
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    name: Sinh bai cong nghe moi
+    runs-on: [ self-hosted, windows, testing ]
+    steps:
+      - name: Sinh & insert bai
+        shell: powershell
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          $app = "C:\apps\testing"
+          if (-not (Test-Path "$app\prisma\tech_collect.mjs")) { throw "Thieu tech_collect.mjs tren server (chua deploy?)." }
+          if (-not $env:ANTHROPIC_API_KEY) { throw "Thieu secret ANTHROPIC_API_KEY (Repo > Settings > Secrets > Actions)." }
+          # Nap DATABASE_URL tu .env production
+          $dburl = (Get-Content "$app\.env" | Where-Object { $_ -match '^\s*DATABASE_URL\s*=' } | Select-Object -First 1) -replace '^\s*DATABASE_URL\s*=\s*', '' -replace '^"', '' -replace '"\s*$', ''
+          if (-not $dburl) { throw "Khong doc duoc DATABASE_URL tu $app\.env" }
+          $env:DATABASE_URL = $dburl
+          Set-Location $app
+          node prisma/tech_collect.mjs

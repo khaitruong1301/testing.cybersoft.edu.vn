@@ -91,6 +91,12 @@ export default function DocumentsBrowser({ categories, heading = "📚" }) {
   const lvlOf = (a) => (a.level === "beginner" ? "beginner" : "advanced");
   const begCount = base.filter((a) => lvlOf(a) === "beginner").length;
   const advCount = base.length - begCount;
+  const oneLevel = begCount === 0 || advCount === 0; // danh mục 1 cấp -> ẩn tab chọn cấp
+  // Tự chọn cấp có nội dung khi danh mục chỉ 1 cấp.
+  useEffect(() => {
+    if (begCount === 0 && advCount > 0 && level !== "advanced") setLevel("advanced");
+    else if (advCount === 0 && begCount > 0 && level !== "beginner") setLevel("beginner");
+  }, [begCount, advCount]); // eslint-disable-line react-hooks/exhaustive-deps
   let list = base.filter((a) => lvlOf(a) === level);
   // "Độ hấp dẫn" = ưu tiên bài được vote/đọc/xem nhiều (kéo bài hay lên đầu).
   const hot = (a) => (a.upvotes || 0) * 8 - (a.downvotes || 0) * 4 + (a.viewCount || 0) + (a.readCount || 0) * 3;
@@ -155,8 +161,8 @@ export default function DocumentsBrowser({ categories, heading = "📚" }) {
           </div>
         )}
 
-        {/* ===== Level tabs: choose content level ===== */}
-        <div className="px-4 pb-4 pt-2 md:px-0 md:pb-5">
+        {/* ===== Level tabs: choose content level (ẩn khi danh mục chỉ 1 cấp) ===== */}
+        <div className={`px-4 pb-4 pt-2 md:px-0 md:pb-5 ${oneLevel ? "hidden" : ""}`}>
           <div className="mb-2 flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-slate-400">
             <span className="h-1 w-4 rounded-full bg-brand-400" />
             {L("Chọn cấp độ nội dung", "Choose your level", "レベルを選択")}
