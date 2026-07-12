@@ -15,9 +15,10 @@ jobs:
     name: Kiểm tra (prisma + build)
     runs-on: ubuntu-latest
     env:
-      # Giá trị giả để build/generate không kẹt vì thiếu env. SQLite file tạm cho CI
-      # (route đọc cookie là dynamic nên Next không truy vấn DB khi build).
-      DATABASE_URL: "file:./ci.db"
+      # Giá trị GIẢ chỉ để prisma generate/validate + build chạy (KHÔNG kết nối DB thật;
+      # route đọc cookie là dynamic nên Next không truy vấn DB khi build). Phải là URL
+      # postgresql:// cho khớp provider="postgresql" trong schema, nếu không `prisma validate` fail.
+      DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci?schema=public"
       AUTH_SECRET: "ci-build-secret-please-override-in-production-0000"
       NEXT_TELEMETRY_DISABLED: "1"
     steps:
