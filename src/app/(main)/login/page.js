@@ -179,11 +179,18 @@ export default function LoginPage() {
           {error && <p className="rounded-lg bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-600">{error}</p>}
         </form>
 
-        <div className="mt-4 rounded-2xl bg-slate-50 p-3 text-[11px] text-slate-500">
-          {tt("Cần hỗ trợ? ", "Need help? ", "サポート ")}
-          <a href="https://facebook.com/lophocviet" target="_blank" rel="noreferrer" className="font-semibold text-blue-600">Fanpage</a>
-          {" · "}
-          <a href="https://zalo.me/0961051014" target="_blank" rel="noreferrer" className="font-semibold text-blue-500">Zalo 096.105.1014</a>
+        <div className="mt-4 rounded-2xl bg-amber-50 p-3 text-xs text-amber-800">
+          <div className="mb-1.5 font-semibold">
+            {tt("Cần hỗ trợ tư vấn khóa học?", "Need course consultation?", "コース相談が必要ですか？")}
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <a href="https://facebook.com/lophocviet" target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-lg bg-white px-3 py-2 font-semibold text-blue-600">
+              💬 {tt("Inbox Fanpage", "Inbox Fanpage", "Fanpageへ")} →
+            </a>
+            <a href="https://zalo.me/0961051014" target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-lg bg-white px-3 py-2 font-semibold text-blue-500">
+              📞 Zalo: 096.105.1014 →
+            </a>
+          </div>
         </div>
 
         <p className="mt-3 text-center text-[11px] text-slate-400">
