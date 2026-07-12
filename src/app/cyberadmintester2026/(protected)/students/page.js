@@ -11,6 +11,8 @@ export default function StudentsPage() {
   const [editing, setEditing] = useState(null); // student object
   const [enrolling, setEnrolling] = useState(null); // student object
   const [adding, setAdding] = useState(false); // modal thêm học viên
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(30); // 30 | 50 | 100
 
   const load = useCallback(async () => {
     const params = new URLSearchParams();
@@ -50,6 +52,12 @@ export default function StudentsPage() {
   const fmt = (d) => (d ? new Date(d).toLocaleDateString("vi-VN") : "—");
   const expired = (s) => s.accessExpires && new Date(s.accessExpires) < new Date();
 
+  // Đổi bộ lọc / cỡ trang -> về trang 1.
+  useEffect(() => { setPage(1); }, [q, classId, type, pageSize]);
+  const totalPages = Math.max(1, Math.ceil(students.length / pageSize));
+  const safePage = Math.min(page, totalPages);
+  const pagedStudents = students.slice((safePage - 1) * pageSize, safePage * pageSize);
+
   return (
     <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
@@ -61,6 +69,11 @@ export default function StudentsPage() {
           >
             + Thêm học viên
           </button>
+          <select value={pageSize} onChange={(e) => setPageSize(Number(e.target.value))} className="rounded-lg border border-slate-200 px-3 py-2 text-sm" title="Số dòng mỗi trang">
+            <option value={30}>30 / trang</option>
+            <option value={50}>50 / trang</option>
+            <option value={100}>100 / trang</option>
+          </select>
           <select value={type} onChange={(e) => setType(e.target.value)} className="rounded-lg border border-slate-200 px-3 py-2 text-sm">
             <option value="">Tất cả loại</option>
             <option value="OLD">Học viên cũ</option>
@@ -97,7 +110,7 @@ export default function StudentsPage() {
             </tr>
           </thead>
           <tbody>
-            {students.map((s) => (
+            {pagedStudents.map((s) => (
               <tr key={s.id} className="border-t border-slate-100 align-middle">
                 <td className="p-3">
                   <div className="font-semibold text-slate-700">{s.name}</div>
@@ -172,6 +185,22 @@ export default function StudentsPage() {
           </tbody>
         </table>
       </div>
+      {totalPages > 1 && (
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-1.5">
+          <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={safePage <= 1}
+            className="rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-bold text-slate-600 disabled:opacity-40 hover:bg-slate-200">←</button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1)
+            .filter((n) => n === 1 || n === totalPages || Math.abs(n - safePage) <= 2)
+            .reduce((acc, n) => { if (acc.length && n - acc[acc.length - 1] > 1) acc.push("…"); acc.push(n); return acc; }, [])
+            .map((n, i) => n === "…"
+              ? <span key={`e${i}`} className="px-1.5 text-slate-400">…</span>
+              : <button key={n} onClick={() => setPage(n)}
+                  className={`min-w-[36px] rounded-lg px-3 py-1.5 text-sm font-bold transition ${n === safePage ? "bg-brand-600 text-white shadow-sm" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}>{n}</button>)}
+          <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={safePage >= totalPages}
+            className="rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-bold text-slate-600 disabled:opacity-40 hover:bg-slate-200">→</button>
+          <span className="ml-2 text-xs font-semibold text-slate-400">Trang {safePage}/{totalPages} · {students.length} học viên</span>
+        </div>
+      )}
       <p className="mt-3 text-xs text-slate-400">
         Ghi danh vào lớp sẽ tự chuyển học viên sang “học viên cũ” và mở full quyền (vĩnh viễn). Học viên chưa đăng ký chỉ dùng thử tối đa 3 ngày rồi hết hạn.
       </p>
