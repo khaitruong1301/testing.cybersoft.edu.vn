@@ -43,12 +43,14 @@ import { MB_YEUCAU_01 } from "./doc_mb_phan_tich_yeu_cau.mjs";
 import { MB_DANGNHAP_01 } from "./doc_mb_dang_nhap.mjs";
 import { MB_TIMKIEM_01 } from "./doc_mb_tim_kiem.mjs";
 import { MB_TESTREPORT_01 } from "./doc_mb_test_report.mjs";
+import { MB_GIOHANG_01 } from "./doc_mb_gio_hang.mjs";
+import { MB_UPLOAD_01 } from "./doc_mb_upload_file.mjs";
 
 const SOURCES = [
   {
     categorySlug: "manual-testing",
     startOrder: 1, // seed.mjs: `let mo = 1`
-    docs: [...BEGINNER_MANUAL_DOCS, ...BEGINNER_MANUAL_ENT_DOCS, ...MANUAL_BEGINNER_DEFECT_01, ...MANUAL_BEGINNER_SEVPRI_01, ...MANUAL_BEGINNER_NEGATIVE_01, ...MB_TEST_DATA_01, ...MB_YEUCAU_01, ...MB_DANGNHAP_01, ...MB_TIMKIEM_01, ...MB_TESTREPORT_01, ...MANUAL_ADV_01, ...MANUAL_STATE_01],
+    docs: [...BEGINNER_MANUAL_DOCS, ...BEGINNER_MANUAL_ENT_DOCS, ...MANUAL_BEGINNER_DEFECT_01, ...MANUAL_BEGINNER_SEVPRI_01, ...MANUAL_BEGINNER_NEGATIVE_01, ...MB_TEST_DATA_01, ...MB_YEUCAU_01, ...MB_DANGNHAP_01, ...MB_TIMKIEM_01, ...MB_TESTREPORT_01, ...MB_GIOHANG_01, ...MB_UPLOAD_01, ...MANUAL_ADV_01, ...MANUAL_STATE_01],
   },
 ];
 
