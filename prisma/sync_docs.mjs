@@ -49,12 +49,14 @@ import { MB_THONGBAO_01 } from "./doc_mb_thong_bao.mjs";
 import { MB_EMAILOTP_01 } from "./doc_mb_email_otp.mjs";
 import { MB_PHANTRANG_01 } from "./doc_mb_phan_trang.mjs";
 import { MB_DANGONNGU_01 } from "./doc_mb_da_ngon_ngu.mjs";
+import { MB_PHANQUYEN_01 } from "./doc_mb_phan_quyen.mjs";
+import { MB_RESETPW_01 } from "./doc_mb_dat_lai_mat_khau.mjs";
 
 const SOURCES = [
   {
     categorySlug: "manual-testing",
     startOrder: 1, // seed.mjs: `let mo = 1`
-    docs: [...BEGINNER_MANUAL_DOCS, ...BEGINNER_MANUAL_ENT_DOCS, ...MANUAL_BEGINNER_DEFECT_01, ...MANUAL_BEGINNER_SEVPRI_01, ...MANUAL_BEGINNER_NEGATIVE_01, ...MB_TEST_DATA_01, ...MB_YEUCAU_01, ...MB_DANGNHAP_01, ...MB_TIMKIEM_01, ...MB_TESTREPORT_01, ...MB_GIOHANG_01, ...MB_UPLOAD_01, ...MB_THONGBAO_01, ...MB_EMAILOTP_01, ...MB_PHANTRANG_01, ...MB_DANGONNGU_01, ...MANUAL_ADV_01, ...MANUAL_STATE_01],
+    docs: [...BEGINNER_MANUAL_DOCS, ...BEGINNER_MANUAL_ENT_DOCS, ...MANUAL_BEGINNER_DEFECT_01, ...MANUAL_BEGINNER_SEVPRI_01, ...MANUAL_BEGINNER_NEGATIVE_01, ...MB_TEST_DATA_01, ...MB_YEUCAU_01, ...MB_DANGNHAP_01, ...MB_TIMKIEM_01, ...MB_TESTREPORT_01, ...MB_GIOHANG_01, ...MB_UPLOAD_01, ...MB_THONGBAO_01, ...MB_EMAILOTP_01, ...MB_PHANTRANG_01, ...MB_DANGONNGU_01, ...MB_PHANQUYEN_01, ...MB_RESETPW_01, ...MANUAL_ADV_01, ...MANUAL_STATE_01],
   },
 ];
 
