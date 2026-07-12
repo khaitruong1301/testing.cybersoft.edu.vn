@@ -32,6 +32,10 @@ import { DATA as IV6 } from "./interview6.mjs";
 import { DATA as IV7 } from "./interview7.mjs";
 import { DATA as IV8 } from "./interview8.mjs";
 import { DATA as IV9 } from "./interview9.mjs";
+import { DATA as IV10 } from "./interview10.mjs";
+import { DATA as IV11 } from "./interview11.mjs";
+import { DATA as IV12 } from "./interview12.mjs";
+import { DATA as IV13 } from "./interview13.mjs";
 import { ISTQB_LEVELS, ISTQB_MCQ } from "./istqb.mjs";
 
 const prisma = new PrismaClient();
@@ -115,7 +119,7 @@ async function main() {
       explanation: J(item.exp), difficulty: 1,
     });
   };
-  for (const m of [...MCQ, ...MCQ2, ...IV3A, ...IV3B, ...IV4, ...IV5, ...IV6, ...IV7, ...IV8, ...IV9]) addIV("MCQ", m);
+  for (const m of [...MCQ, ...MCQ2, ...IV3A, ...IV3B, ...IV4, ...IV5, ...IV6, ...IV7, ...IV8, ...IV9, ...IV10, ...IV11, ...IV12, ...IV13]) addIV("MCQ", m);
   for (const e of [...ESSAY, ...ESSAY2]) addIV("ESSAY", e);
   for (const s of [...SCENARIO, ...SCENARIO2]) addIV("SCENARIO", s);
   for (const q of ISTQB_MCQ) {

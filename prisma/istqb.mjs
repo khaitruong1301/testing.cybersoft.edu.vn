@@ -12,6 +12,9 @@ import { DATA as ISTQB_EXT4 } from "./bank_istqb_ext4.mjs";
 import { DATA as ISTQB_EXT5 } from "./bank_istqb_ext5.mjs";
 import { DATA as ISTQB_EXT6 } from "./bank_istqb_ext6.mjs";
 import { DATA as ISTQB_EXT7 } from "./bank_istqb_ext7.mjs";
+import { DATA as ISTQB_EXT8 } from "./bank_istqb_ext8.mjs";
+import { DATA as ISTQB_EXT9 } from "./bank_istqb_ext9.mjs";
+import { DATA as ISTQB_EXT10 } from "./bank_istqb_ext10.mjs";
 
 // ============================================================================
 // ISTQB practice bank — 3 levels, 100 câu / level (300 câu), đủ 3 ngôn ngữ vi/en/ja.
@@ -42,4 +45,7 @@ export const ISTQB_MCQ = [
   ...ISTQB_EXT5.map((d) => ({ lvl: d.lvl, q: d.q, options: d.options, answer: d.answer, exp: d.exp })),
   ...ISTQB_EXT6.map((d) => ({ lvl: d.lvl, q: d.q, options: d.options, answer: d.answer, exp: d.exp })),
   ...ISTQB_EXT7.map((d) => ({ lvl: d.lvl, q: d.q, options: d.options, answer: d.answer, exp: d.exp })),
+  ...ISTQB_EXT8.map((d) => ({ lvl: d.lvl, q: d.q, options: d.options, answer: d.answer, exp: d.exp })),
+  ...ISTQB_EXT9.map((d) => ({ lvl: d.lvl, q: d.q, options: d.options, answer: d.answer, exp: d.exp })),
+  ...ISTQB_EXT10.map((d) => ({ lvl: d.lvl, q: d.q, options: d.options, answer: d.answer, exp: d.exp })),
 ];
