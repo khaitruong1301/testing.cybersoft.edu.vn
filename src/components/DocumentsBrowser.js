@@ -26,8 +26,12 @@ export default function DocumentsBrowser({ categories, heading = "📚" }) {
   const [query, setQuery] = useState(qParam);
   const [advOpen, setAdvOpen] = useState(false);
   const [status, setStatus] = useState("all"); // all | unread | read | saved
-  const [sort, setSort] = useState("default"); // default | views | readers
+  const [sort, setSort] = useState("default"); // default(hot) | newest | views | readers
   const [level, setLevel] = useState("beginner"); // beginner | advanced (2 tabs) — mặc định: Dành cho người mới
+  const [page, setPage] = useState(1);
+
+  // Đổi danh mục/cấp/lọc/tìm/sort -> về trang 1.
+  useEffect(() => { setPage(1); }, [active, level, activeTag, query, status, sort]);
 
   const selectCategory = (id) => { setActive(id); setActiveTag(null); };
 
@@ -88,8 +92,18 @@ export default function DocumentsBrowser({ categories, heading = "📚" }) {
   const begCount = base.filter((a) => lvlOf(a) === "beginner").length;
   const advCount = base.length - begCount;
   let list = base.filter((a) => lvlOf(a) === level);
+  // "Độ hấp dẫn" = ưu tiên bài được vote/đọc/xem nhiều (kéo bài hay lên đầu).
+  const hot = (a) => (a.upvotes || 0) * 8 - (a.downvotes || 0) * 4 + (a.viewCount || 0) + (a.readCount || 0) * 3;
   if (sort === "views") list = [...list].sort((a, b) => b.viewCount - a.viewCount);
   else if (sort === "readers") list = [...list].sort((a, b) => b.readCount - a.readCount);
+  else if (sort === "newest") list = [...list].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  else list = [...list].sort((a, b) => hot(b) - hot(a)); // mặc định: hấp dẫn nhất lên đầu
+
+  // ---- Phân trang khi > 50 bài ----
+  const PAGE_SIZE = 50;
+  const totalPages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const pagedList = list.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   const readCount = (c) => (c?.articles || []).filter((a) => isRead(a.id)).length;
   const curRead = readCount(current);
@@ -233,7 +247,7 @@ export default function DocumentsBrowser({ categories, heading = "📚" }) {
               </div>
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 <span className="text-[11px] font-bold text-slate-400">{L("Sắp xếp", "Sort", "並び")}</span>
-                {[["default", L("Mặc định", "Default", "既定")], ["views", L("Xem nhiều", "Most viewed", "閲覧数")], ["readers", L("Người đọc", "Most readers", "読者数")]].map(([k, lbl]) => (
+                {[["default", L("Hấp dẫn", "Trending", "人気")], ["newest", L("Mới nhất", "Newest", "新着")], ["views", L("Xem nhiều", "Most viewed", "閲覧数")], ["readers", L("Người đọc", "Most readers", "読者数")]].map(([k, lbl]) => (
                   <button key={k} onClick={() => setSort(k)}
                     className={`rounded-full px-2.5 py-1 text-[11px] font-bold ring-1 transition ${sort === k ? "bg-brand-600 text-white ring-brand-600" : "bg-slate-50 text-slate-600 ring-slate-200 hover:bg-slate-100"}`}>
                     {lbl}
@@ -290,11 +304,29 @@ export default function DocumentsBrowser({ categories, heading = "📚" }) {
         </div>
 
         <div className="mt-4 grid gap-4 px-4 sm:grid-cols-2 md:px-0 xl:grid-cols-3 2xl:grid-cols-4 min-[1900px]:grid-cols-5">
-          {list.map((a) => (
+          {pagedList.map((a) => (
             <ArticleCard key={a.id} article={a} href={`/documents/article/${a.id}`} locked={!student}
               activeTag={activeTag} onTagClick={setActiveTag} />
           ))}
         </div>
+
+        {/* ===== Phân trang (khi > 50 bài) ===== */}
+        {totalPages > 1 && (
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-1.5 px-4 md:px-0">
+            <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={safePage <= 1}
+              className="rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-bold text-slate-600 disabled:opacity-40 hover:bg-slate-200">←</button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter((n) => n === 1 || n === totalPages || Math.abs(n - safePage) <= 2)
+              .reduce((acc, n) => { if (acc.length && n - acc[acc.length - 1] > 1) acc.push("…"); acc.push(n); return acc; }, [])
+              .map((n, i) => n === "…"
+                ? <span key={`e${i}`} className="px-1.5 text-slate-400">…</span>
+                : <button key={n} onClick={() => setPage(n)}
+                    className={`min-w-[36px] rounded-lg px-3 py-1.5 text-sm font-bold transition ${n === safePage ? "bg-brand-600 text-white shadow-sm" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}>{n}</button>)}
+            <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={safePage >= totalPages}
+              className="rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-bold text-slate-600 disabled:opacity-40 hover:bg-slate-200">→</button>
+            <span className="ml-2 text-xs font-semibold text-slate-400">{L("Trang", "Page", "ページ")} {safePage}/{totalPages} · {list.length} {L("bài", "articles", "記事")}</span>
+          </div>
+        )}
         {list.length === 0 && (
           <div className="px-4 py-14 text-center md:px-0">
             {!searchMode && level === "beginner" ? (

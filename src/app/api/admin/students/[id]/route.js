@@ -56,21 +56,25 @@ export async function PATCH(req, { params }) {
   const base = student.accessExpires && student.accessExpires > new Date() ? student.accessExpires : new Date();
 
   if (action === "extend") {
-    // 1 tháng cho học viên cũ / 3 tháng cho chưa đăng ký
-    const days =
-      student.type === "OLD" ? num(settings.extend_days_old, 30) : num(settings.extend_days_unregistered, 90);
+    // Học viên đã đăng ký / OLD = truy cập VĨNH VIỄN -> không cần (và không) gia hạn.
+    if (student.registered || student.type === "OLD") {
+      return NextResponse.json(
+        { error: "Học viên đã đăng ký/đã học có quyền vĩnh viễn, không cần gia hạn." },
+        { status: 400 }
+      );
+    }
+    // Chưa đăng ký: chỉ dùng thử tối đa 3 ngày (thống nhất access_days_unregistered).
+    const days = num(settings.access_days_unregistered, 3);
     const accessExpires = new Date(base.getTime() + days * 86400000);
     const updated = await prisma.student.update({ where: { id }, data: { accessExpires } });
     return NextResponse.json({ ok: true, student: updated });
   }
 
   if (action === "register") {
-    // Đổi trạng thái chưa đăng ký -> đã đăng ký, tự gia hạn (3 tháng mặc định).
-    const addDays = num(settings.extend_days_unregistered, 90);
-    const accessExpires = new Date(base.getTime() + addDays * 86400000);
+    // Đã đăng ký -> học viên cũ, truy cập VĨNH VIỄN (bỏ ngày hết hạn).
     const updated = await prisma.student.update({
       where: { id },
-      data: { registered: true, type: "OLD", accessExpires },
+      data: { registered: true, type: "OLD", accessExpires: null },
     });
     return NextResponse.json({ ok: true, student: updated });
   }

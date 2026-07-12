@@ -10,6 +10,7 @@ export default function StudentsPage() {
   const [busy, setBusy] = useState("");
   const [editing, setEditing] = useState(null); // student object
   const [enrolling, setEnrolling] = useState(null); // student object
+  const [adding, setAdding] = useState(false); // modal thêm học viên
 
   const load = useCallback(async () => {
     const params = new URLSearchParams();
@@ -21,8 +22,11 @@ export default function StudentsPage() {
     setStudents(d.students || []);
   }, [q, classId, type]);
 
+  // Tự cập nhật: nạp lần đầu + poll mỗi 6s (không cần refresh tay).
   useEffect(() => {
     load();
+    const iv = setInterval(load, 6000);
+    return () => clearInterval(iv);
   }, [load]);
 
   useEffect(() => {
@@ -51,6 +55,12 @@ export default function StudentsPage() {
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-2xl font-extrabold text-slate-800">Học viên</h1>
         <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setAdding(true)}
+            className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-bold text-white hover:bg-brand-700"
+          >
+            + Thêm học viên
+          </button>
           <select value={type} onChange={(e) => setType(e.target.value)} className="rounded-lg border border-slate-200 px-3 py-2 text-sm">
             <option value="">Tất cả loại</option>
             <option value="OLD">Học viên cũ</option>
@@ -135,13 +145,16 @@ export default function StudentsPage() {
                     <button onClick={() => setEditing(s)} className="rounded bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-600">
                       Sửa
                     </button>
-                    <button
-                      onClick={() => act(s.id, "extend")}
-                      disabled={busy === s.id + "extend"}
-                      className="rounded bg-brand-50 px-2 py-1 text-[11px] font-semibold text-brand-700"
-                    >
-                      + Gia hạn
-                    </button>
+                    {/* Gia hạn CHỈ cho học viên chưa đăng ký (dùng thử). Đã ĐK/đã học = vĩnh viễn, không hiện. */}
+                    {!s.registered && s.type !== "OLD" && (
+                      <button
+                        onClick={() => act(s.id, "extend")}
+                        disabled={busy === s.id + "extend"}
+                        className="rounded bg-brand-50 px-2 py-1 text-[11px] font-semibold text-brand-700"
+                      >
+                        + Gia hạn 3 ngày
+                      </button>
+                    )}
                     <button onClick={() => act(s.id, "toggleActive")} className="rounded bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-600">
                       {s.active ? "Khoá" : "Mở"}
                     </button>
@@ -160,19 +173,86 @@ export default function StudentsPage() {
         </table>
       </div>
       <p className="mt-3 text-xs text-slate-400">
-        Ghi danh vào lớp sẽ tự chuyển học viên sang “học viên cũ” và mở full quyền (vĩnh viễn). User chưa đăng ký chỉ dùng thử 7 ngày.
+        Ghi danh vào lớp sẽ tự chuyển học viên sang “học viên cũ” và mở full quyền (vĩnh viễn). Học viên chưa đăng ký chỉ dùng thử tối đa 3 ngày rồi hết hạn.
       </p>
 
+      {adding && <AddModal onClose={() => setAdding(false)} onDone={() => { setAdding(false); load(); }} />}
       {editing && <EditModal student={editing} onClose={() => setEditing(null)} onSaved={() => { setEditing(null); load(); }} />}
       {enrolling && (
         <EnrollModal
           student={enrolling}
           classes={classes}
           onClose={() => setEnrolling(null)}
-          onDone={() => { setEnrolling(null); load(); }}
+          onChanged={load}
         />
       )}
     </div>
+  );
+}
+
+function AddModal({ onClose, onDone }) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [type, setType] = useState("UNREGISTERED");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [created, setCreated] = useState(null); // { code, ... }
+
+  async function save() {
+    setError("");
+    if (!name.trim() || !email.trim() || !phone.trim()) return setError("Cần đủ họ tên, email và SĐT.");
+    setBusy(true);
+    const r = await fetch("/api/admin/students", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, phone, type }),
+    });
+    const d = await r.json();
+    setBusy(false);
+    if (!r.ok) return setError(d.error || "Lỗi.");
+    setCreated({ code: d.code, name });
+  }
+
+  if (created) {
+    return (
+      <Overlay onClose={() => { onDone(); }} title="Đã tạo học viên">
+        <p className="text-sm text-slate-600">Học viên <b>{created.name}</b> đã được tạo. Mã đăng nhập:</p>
+        <div className="flex items-center gap-2">
+          <code className="flex-1 rounded-lg bg-slate-100 px-3 py-2 text-center font-mono text-lg font-bold tracking-widest text-slate-800">{created.code}</code>
+          <button onClick={() => navigator.clipboard?.writeText(created.code)} className="rounded-lg bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-600">Copy</button>
+        </div>
+        <p className="text-[11px] text-slate-400">Gửi mã này cùng email + SĐT cho học viên để đăng nhập. {type === "UNREGISTERED" ? "Dùng thử tối đa 3 ngày." : "Truy cập vĩnh viễn."}</p>
+        <button onClick={onDone} className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-bold text-white">Xong</button>
+      </Overlay>
+    );
+  }
+
+  return (
+    <Overlay onClose={onClose} title="Thêm học viên mới">
+      <label className="block text-xs font-semibold text-slate-500">Họ tên
+        <input value={name} onChange={(e) => setName(e.target.value)} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" />
+      </label>
+      <label className="block text-xs font-semibold text-slate-500">Email
+        <input value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" />
+      </label>
+      <label className="block text-xs font-semibold text-slate-500">Số điện thoại
+        <input value={phone} onChange={(e) => setPhone(e.target.value)} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" />
+      </label>
+      <label className="block text-xs font-semibold text-slate-500">Loại
+        <select value={type} onChange={(e) => setType(e.target.value)} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm">
+          <option value="UNREGISTERED">Chưa đăng ký (dùng thử 3 ngày)</option>
+          <option value="OLD">Học viên cũ (vĩnh viễn)</option>
+        </select>
+      </label>
+      {error && <p className="rounded bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-600">{error}</p>}
+      <div className="flex gap-2">
+        <button onClick={save} disabled={busy} className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-bold text-white disabled:opacity-60">
+          {busy ? "Đang tạo…" : "Tạo học viên"}
+        </button>
+        <button onClick={onClose} className="rounded-lg bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-600">Huỷ</button>
+      </div>
+    </Overlay>
   );
 }
 
@@ -221,50 +301,96 @@ function EditModal({ student, onClose, onSaved }) {
   );
 }
 
-function EnrollModal({ student, classes, onClose, onDone }) {
+function EnrollModal({ student, classes, onClose, onChanged }) {
+  const [enrolls, setEnrolls] = useState(student.enrollments || []);
   const [classId, setClassId] = useState("");
   const [status, setStatus] = useState("STUDYING");
   const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState("");
 
-  async function submit() {
+  const enrolledIds = new Set(enrolls.map((e) => e.class?.id).filter(Boolean));
+  const available = classes.filter((c) => !enrolledIds.has(c.id));
+  const api = (method, body) =>
+    fetch("/api/admin/enroll", { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+
+  async function addClass() {
     setError("");
-    if (!classId) return setError("Chọn lớp.");
-    setBusy(true);
-    const r = await fetch("/api/admin/enroll", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ studentId: student.id, classId, status }),
-    });
+    if (!classId) return setError("Chọn lớp để ghi danh.");
+    setBusy("add");
+    const r = await api("POST", { studentId: student.id, classId, status });
     const d = await r.json();
-    setBusy(false);
+    setBusy("");
     if (!r.ok) return setError(d.error || "Lỗi.");
-    onDone();
+    const cls = classes.find((c) => c.id === classId);
+    setEnrolls((p) => [...p, { id: d.enrollment?.id || classId, class: cls, status }]);
+    setClassId("");
+    onChanged?.();
+  }
+  async function changeStatus(en, st) {
+    setBusy(en.id + "st");
+    await api("PATCH", { enrollmentId: en.id, status: st }).catch(() => {});
+    setEnrolls((p) => p.map((x) => (x.id === en.id ? { ...x, status: st } : x)));
+    setBusy("");
+    onChanged?.();
+  }
+  async function removeEnroll(en) {
+    setBusy(en.id + "rm");
+    await api("DELETE", { enrollmentId: en.id }).catch(() => {});
+    setEnrolls((p) => p.filter((x) => x.id !== en.id));
+    setBusy("");
+    onChanged?.();
   }
 
   return (
     <Overlay onClose={onClose} title={`Ghi danh: ${student.name}`}>
-      <p className="text-xs text-slate-500">Ghi danh vào lớp sẽ tự chuyển học viên thành “học viên cũ” và mở full quyền vĩnh viễn.</p>
-      <select value={classId} onChange={(e) => setClassId(e.target.value)} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm">
-        <option value="">— Chọn lớp —</option>
-        {classes.map((c) => (
-          <option key={c.id} value={c.id}>
-            {c.name}{c.branch?.name ? ` · ${c.branch.name}` : ""}
-          </option>
-        ))}
-      </select>
-      <select value={status} onChange={(e) => setStatus(e.target.value)} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm">
-        <option value="STUDYING">Đang học</option>
-        <option value="COMPLETED">Đã học</option>
-      </select>
-      {classes.length === 0 && <p className="text-[11px] text-amber-600">Chưa có lớp nào. Tạo lớp ở mục Lớp học trước.</p>}
-      {error && <p className="rounded bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-600">{error}</p>}
-      <div className="flex gap-2">
-        <button onClick={submit} disabled={busy} className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white disabled:opacity-60">
-          {busy ? "Đang ghi danh…" : "Ghi danh"}
-        </button>
-        <button onClick={onClose} className="rounded-lg bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-600">Huỷ</button>
+      {/* ----- Lớp đang ghi danh ----- */}
+      <div>
+        <p className="mb-1 text-xs font-bold text-slate-600">Lớp đang ghi danh</p>
+        {enrolls.length === 0 ? (
+          <p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-400">Chưa ghi danh lớp nào.</p>
+        ) : (
+          <div className="space-y-1.5">
+            {enrolls.map((en) => (
+              <div key={en.id} className="flex items-center gap-2 rounded-lg bg-slate-50 px-2.5 py-1.5">
+                <span className="flex-1 truncate text-xs font-semibold text-slate-700">
+                  {en.class?.name}{en.class?.branch?.name ? ` · ${en.class.branch.name}` : ""}
+                </span>
+                <select value={en.status} onChange={(e) => changeStatus(en, e.target.value)} disabled={busy === en.id + "st"}
+                  className="rounded border border-slate-200 px-1.5 py-1 text-[11px]">
+                  <option value="STUDYING">Đang học</option>
+                  <option value="COMPLETED">Đã học</option>
+                </select>
+                <button onClick={() => removeEnroll(en)} disabled={busy === en.id + "rm"}
+                  className="rounded bg-rose-50 px-2 py-1 text-[11px] font-semibold text-rose-600 disabled:opacity-50">Gỡ</button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
+
+      {/* ----- Thêm / chuyển lớp ----- */}
+      <div className="mt-3 border-t border-slate-100 pt-3">
+        <p className="mb-1 text-xs font-bold text-slate-600">Thêm / chuyển lớp</p>
+        <select value={classId} onChange={(e) => setClassId(e.target.value)} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm">
+          <option value="">— Chọn lớp —</option>
+          {available.map((c) => (
+            <option key={c.id} value={c.id}>{c.name}{c.branch?.name ? ` · ${c.branch.name}` : ""}</option>
+          ))}
+        </select>
+        <select value={status} onChange={(e) => setStatus(e.target.value)} className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm">
+          <option value="STUDYING">Đang học</option>
+          <option value="COMPLETED">Đã học</option>
+        </select>
+        {classes.length === 0 && <p className="mt-1 text-[11px] text-amber-600">Chưa có lớp nào. Tạo lớp ở mục Lớp học trước.</p>}
+        {classes.length > 0 && available.length === 0 && <p className="mt-1 text-[11px] text-slate-400">Đã ghi danh tất cả lớp hiện có.</p>}
+        {error && <p className="mt-1 rounded bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-600">{error}</p>}
+        <button onClick={addClass} disabled={busy === "add" || !classId} className="mt-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white disabled:opacity-60">
+          {busy === "add" ? "Đang ghi danh…" : "Ghi danh lớp này"}
+        </button>
+      </div>
+
+      <p className="mt-2 text-[11px] text-slate-400">Ghi danh mở full quyền vĩnh viễn. “Chuyển lớp” = ghi danh lớp mới rồi Gỡ lớp cũ.</p>
+      <button onClick={onClose} className="mt-1 w-full rounded-lg bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-600">Đóng</button>
     </Overlay>
   );
 }

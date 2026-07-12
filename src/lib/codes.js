@@ -1,5 +1,20 @@
 import crypto from "crypto";
 
+// Chuẩn hóa số điện thoại VN về dạng nội địa bắt đầu bằng 0.
+//  - Bỏ mọi ký tự không phải số (khoảng trắng, dấu chấm, gạch, ngoặc…).
+//  - +84xxxxxxxxx / 84xxxxxxxxx  -> 0xxxxxxxxx
+//  - Excel lưu SĐT dạng SỐ làm mất số 0 đầu (9 chữ số) -> thêm lại "0".
+export function normalizePhoneVN(raw) {
+  let p = String(raw ?? "").trim();
+  if (!p) return "";
+  const plus = p.replace(/[^\d+]/g, "");
+  let d = plus.replace(/\D/g, "");
+  if (plus.startsWith("+84")) d = "0" + d.slice(2);
+  else if (d.startsWith("84") && d.length >= 11) d = "0" + d.slice(2);
+  if (d.length === 9 && d[0] !== "0") d = "0" + d; // Excel mất số 0 đầu
+  return d;
+}
+
 // Unambiguous alphabet: no 0/O, 1/I/L to avoid confusion when typing.
 const ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
 const LEN = 6;

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import * as XLSX from "xlsx";
 import { prisma } from "@/lib/prisma";
 import { getCurrentAdmin } from "@/lib/session";
-import { generateUniqueCodes } from "@/lib/codes";
+import { generateUniqueCodes, normalizePhoneVN } from "@/lib/codes";
 
 export const runtime = "nodejs";
 
@@ -40,11 +40,12 @@ export async function POST(req) {
     return "";
   };
 
+  const PHONE_KEYS = ["phone", "sđt", "sdt", "số điện", "so dien", "điện", "dien", "đt", "dt", "mobile", "di động", "di dong", "tel", "liên hệ", "lien he", "contact"];
   const roster = rows
     .map((r) => ({
-      name: pick(r, ["name", "tên", "ten", "họ", "ho"]),
-      email: pick(r, ["email", "mail"]),
-      phone: pick(r, ["phone", "sđt", "sdt", "điện", "dien", "phone number"]),
+      name: pick(r, ["name", "fullname", "full name", "họ", "tên", "ten", "ho ten", "ho va ten"]),
+      email: pick(r, ["email", "mail", "e-mail"]),
+      phone: normalizePhoneVN(pick(r, PHONE_KEYS)),
     }))
     .filter((r) => r.email || r.phone || r.name);
 

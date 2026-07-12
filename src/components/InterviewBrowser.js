@@ -26,7 +26,7 @@ function levelInfo(titleText, t) {
   return { tier: t("tier_bundle"), desc: t("tier_desc_generic") };
 }
 
-export default function InterviewBrowser({ categories, titleKey = "nav_interview", subtitleKey, accent = "emerald" }) {
+export default function InterviewBrowser({ categories, titleKey = "nav_interview", subtitleKey, accent = "emerald", perSession }) {
   const { lang, t } = useLang();
   const [runCat, setRunCat] = useState(null);
 
@@ -42,6 +42,7 @@ export default function InterviewBrowser({ categories, titleKey = "nav_interview
   }
 
   const totalQ = categories.reduce((s, c) => s + (c.count || 0), 0);
+  const perLabel = lang === "ja" ? "問/回" : lang === "en" ? " / session" : " câu/lượt";
   const heroGrad = accent === "amber" ? "from-amber-500 via-orange-500 to-rose-500" : "from-emerald-500 via-teal-500 to-cyan-600";
   const subtitle = subtitleKey ? t(subtitleKey) : "";
   const badgeText = accent === "amber" ? t("badge_istqb") : t("badge_interview");
@@ -59,7 +60,11 @@ export default function InterviewBrowser({ categories, titleKey = "nav_interview
           <h1 className="mt-3 text-2xl font-black tracking-tight md:text-3xl">{t(titleKey)}</h1>
           <p className="mt-2 max-w-2xl text-sm text-white/90 md:text-base">{subtitle}</p>
           <div className="mt-4 flex flex-wrap gap-2 text-[12px] font-semibold">
-            {[`⚡ ${t("b_autograde")}`, `📖 ${t("b_explain")}`, `🔁 ${t("b_unlimited")}`, `🗂️ ${totalQ.toLocaleString("en-US")} ${t("questions")}`].map((b) => (
+            {[
+              ...(perSession ? [`🎲 ${perSession}${perLabel}`] : []),
+              `⚡ ${t("b_autograde")}`, `📖 ${t("b_explain")}`, `🔁 ${t("b_unlimited")}`,
+              `🗂️ ${totalQ.toLocaleString("en-US")} ${t("questions")}`,
+            ].map((b) => (
               <span key={b} className="rounded-full bg-white/15 px-3 py-1 backdrop-blur">{b}</span>
             ))}
           </div>
@@ -90,6 +95,7 @@ export default function InterviewBrowser({ categories, titleKey = "nav_interview
 
                 <div className="mt-4 flex flex-wrap gap-1.5">
                   <span className={`rounded-lg ${p.soft} px-2.5 py-1 text-[11px] font-bold`}>{c.count} {t("questions")}</span>
+                  {perSession ? <span className="rounded-lg bg-slate-800 px-2.5 py-1 text-[11px] font-bold text-white">🎲 {perSession}{perLabel}</span> : null}
                   <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600">{t("chip_selfgrade")}</span>
                   <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600">{t("chip_hasexplain")}</span>
                 </div>

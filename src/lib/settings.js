@@ -3,11 +3,12 @@ import { prisma } from "./prisma";
 // Default configurable settings.
 export const DEFAULTS = {
   access_days_old: "0", // học viên cũ: 0 = xem VĨNH VIỄN (không hết hạn)
-  access_days_unregistered: "7", // học viên chưa đăng ký: 7 ngày
+  access_days_unregistered: "3", // học viên chưa đăng ký: dùng thử tối đa 3 ngày
   extend_days_old: "0", // gia hạn học viên cũ: 0 = vĩnh viễn
-  extend_days_unregistered: "90", // đổi sang đã đăng ký: 3 tháng
+  extend_days_unregistered: "3", // gia hạn chưa đăng ký: 3 ngày (thống nhất)
   quiz_mcq_count: "30", // số câu trắc nghiệm mỗi lượt luyện
   quiz_essay_count: "5", // số câu tự luận mỗi lượt luyện
+  interview_question_count: "30", // số câu mỗi lượt LUYỆN PHỎNG VẤN theo danh mục
   mock_question_count: "40", // số câu mock interview
   mock_duration_min: "45", // thời gian làm bài mock (phút)
 };

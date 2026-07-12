@@ -2,10 +2,11 @@
 import { useEffect, useState } from "react";
 
 const FIELDS = [
-  ["access_days_old", "Thời hạn truy cập — học viên cũ (ngày)"],
-  ["access_days_unregistered", "Thời hạn truy cập — chưa đăng ký (ngày)"],
+  ["access_days_old", "Thời hạn truy cập — học viên cũ (ngày, 0 = vĩnh viễn)"],
+  ["access_days_unregistered", "Dùng thử — chưa đăng ký (ngày)"],
   ["extend_days_old", "Gia hạn học viên cũ (ngày)"],
-  ["extend_days_unregistered", "Gia hạn khi đổi sang đã đăng ký (ngày)"],
+  ["extend_days_unregistered", "Gia hạn chưa đăng ký (ngày)"],
+  ["interview_question_count", "Số câu mỗi lượt LUYỆN PHỎNG VẤN"],
   ["quiz_mcq_count", "Số câu trắc nghiệm mỗi lượt luyện"],
   ["quiz_essay_count", "Số câu tự luận mỗi lượt luyện"],
   ["mock_question_count", "Số câu Mock Interview"],

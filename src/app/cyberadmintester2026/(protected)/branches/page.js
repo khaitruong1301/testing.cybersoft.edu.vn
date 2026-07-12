@@ -17,6 +17,8 @@ export default function BranchesPage() {
   }, []);
   useEffect(() => {
     load();
+    const iv = setInterval(load, 8000);
+    return () => clearInterval(iv);
   }, [load]);
 
   async function submit(e) {

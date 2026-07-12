@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { generateOtp, hashOtp, otpExpiry, startOfVnDay, MAX_CODES_PER_DAY } from "@/lib/otp";
 import { sendLoginCodeEmail, emailConfigured } from "@/lib/email";
+import { createStudentSession } from "@/lib/session";
+import { hasAccess } from "@/lib/access";
 
 export const runtime = "nodejs";
 
@@ -54,6 +56,23 @@ export async function POST(req) {
         { error: "Không tìm thấy học viên với email và số điện thoại này. Vui lòng kiểm tra lại hoặc liên hệ giáo vụ." },
         { status: 404 }
       );
+    }
+
+    // TIẾT KIỆM EMAIL: chỉ gửi mã xác nhận ở LẦN ĐĂNG NHẬP ĐẦU TIÊN.
+    // Học viên đã từng đăng nhập (firstLoginAt) -> đăng nhập THẲNG bằng email + SĐT, không gửi mã.
+    if (student.firstLoginAt) {
+      if (!hasAccess(student)) {
+        return NextResponse.json(
+          { error: "Thời hạn truy cập đã hết. Vui lòng liên hệ CyberSoft để được hỗ trợ." },
+          { status: 403 }
+        );
+      }
+      await createStudentSession(student.id);
+      return NextResponse.json({
+        ok: true,
+        loggedIn: true,
+        student: { name: student.name, type: student.type, registered: student.registered, accessExpires: student.accessExpires },
+      });
     }
 
     // Giới hạn 3 mã/ngày (theo lịch Việt Nam).

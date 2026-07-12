@@ -52,7 +52,11 @@ export default function LoginPage() {
       });
       const d = await r.json();
       if (!r.ok) setError(d.error || tt("Không gửi được mã.", "Could not send code.", "コードを送信できません。"));
-      else {
+      else if (d.loggedIn) {
+        // Học viên đã đăng nhập trước đó -> vào thẳng, không cần mã.
+        await refresh();
+        router.push("/documents");
+      } else {
         setCodeSent(true);
         setSentMsg(d.message || "");
       }
@@ -150,9 +154,9 @@ export default function LoginPage() {
               <>
                 <div className="rounded-2xl bg-blue-50 p-3 text-xs text-blue-800">
                   {tt(
-                    "Nhấn “Nhận mã Code” — mã 6 ký tự sẽ được gửi vào email của bạn (hiệu lực 5 phút).",
-                    "Tap “Get code” — a 6-character code will be sent to your email (valid 5 minutes).",
-                    "「コードを受け取る」を押すと、6文字のコードがメールに送信されます（5分間有効）。"
+                    "Nhấn “Đăng nhập”. Lần ĐẦU sẽ gửi mã xác nhận 6 ký tự vào email (hiệu lực 5 phút); các lần sau chỉ cần email + SĐT là vào thẳng.",
+                    "Tap “Log in”. The FIRST time we email you a 6-character code (valid 5 min); after that, email + phone logs you straight in.",
+                    "「ログイン」を押してください。初回のみ6文字の確認コードをメール送信（5分間有効）。以降はメールと電話番号だけでログインできます。"
                   )}
                 </div>
                 <button
@@ -161,7 +165,7 @@ export default function LoginPage() {
                   disabled={sending}
                   className="w-full rounded-xl bg-brand-600 py-3.5 text-sm font-bold text-white disabled:opacity-60"
                 >
-                  {sending ? "…" : tt("Nhận mã Code", "Get code", "コードを受け取る")}
+                  {sending ? "…" : t("submit")}
                 </button>
               </>
             ) : (
@@ -248,10 +252,10 @@ export default function LoginPage() {
 
         <p className="mt-4 text-center text-[11px] text-slate-400">
           {lang === "vi"
-            ? "Học viên cũ: truy cập vĩnh viễn · Chưa đăng ký: 7 ngày (admin có thể đổi)."
+            ? "Học viên cũ: truy cập vĩnh viễn · Chưa đăng ký: dùng thử 3 ngày (admin có thể đổi)."
             : lang === "ja"
-            ? "既存受講生は無期限・未登録は7日間（管理者が変更可）。"
-            : "Existing students: lifetime access · Unregistered: 7 days (admin configurable)."}
+            ? "既存受講生は無期限・未登録は3日間お試し（管理者が変更可）。"
+            : "Existing students: lifetime access · Unregistered: 3-day trial (admin configurable)."}
         </p>
       </div>
     </div>

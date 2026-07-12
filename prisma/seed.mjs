@@ -333,7 +333,16 @@ async function main() {
   // không gắn dữ liệu người dùng nên tạo lại toàn bộ cho gọn.
   // Câu hỏi phỏng vấn/ISTQB KHÔNG gắn dữ liệu người dùng (Attempt lưu câu hỏi trong payload
   // riêng), nên tạo lại từ nguồn cho đồng bộ — không mất lịch sử làm bài của học viên.
-  await prisma.interviewQuestion.deleteMany();
+  // GUARD BẢO TOÀN DỮ LIỆU: chỉ dựng lại câu hỏi khi DB CHƯA có câu nào,
+  // hoặc khi ép tường minh SEED_REBUILD_QUESTIONS=1. Nhờ vậy deploy KHÔNG xoá
+  // các câu đã thêm trực tiếp vào Postgres (vd ISTQB 174/cấp = 780 câu).
+  const _existingQ = await prisma.interviewQuestion.count();
+  const REBUILD_Q = process.env.SEED_REBUILD_QUESTIONS === "1" || _existingQ === 0;
+  if (REBUILD_Q) {
+    await prisma.interviewQuestion.deleteMany();
+  } else {
+    console.log(`  Câu hỏi: GIỮ NGUYÊN ${_existingQ} câu hiện có (không dựng lại). Đặt SEED_REBUILD_QUESTIONS=1 nếu muốn dựng lại từ nguồn .mjs.`);
+  }
   if (PRUNE) {
     // Chỉ khi yêu cầu: dọn bài cũ CHƯA có slug (di trú từ trước khi thêm cột slug).
     await prisma.article.deleteMany({ where: { slug: null } });
@@ -556,10 +565,12 @@ async function main() {
       },
     });
   };
-  for (const m of ALL_MCQ) await addQ("MCQ", m);
-  for (const e of ALL_ESSAY) await addQ("ESSAY", e);
-  for (const s of ALL_SCENARIO) await addQ("SCENARIO", s);
-  console.log(`  INTERVIEW: ${ALL_MCQ.length} MCQ, ${ALL_ESSAY.length} essay, ${ALL_SCENARIO.length} scenario`);
+  if (REBUILD_Q) {
+    for (const m of ALL_MCQ) await addQ("MCQ", m);
+    for (const e of ALL_ESSAY) await addQ("ESSAY", e);
+    for (const s of ALL_SCENARIO) await addQ("SCENARIO", s);
+    console.log(`  INTERVIEW: ${ALL_MCQ.length} MCQ, ${ALL_ESSAY.length} essay, ${ALL_SCENARIO.length} scenario`);
+  }
 
   // ---- ISTQB tab: 3 levels ----
   const lvlMap = {};
@@ -572,16 +583,18 @@ async function main() {
     });
     lvlMap[lv.slug] = cat.id;
   }
-  for (const q of ISTQB_MCQ) {
-    await prisma.interviewQuestion.create({
-      data: {
-        categoryId: lvlMap[q.lvl] || Object.values(lvlMap)[0],
-        kind: "MCQ", prompt: J(q.q), options: J(q.options),
-        answer: String(q.answer), explanation: J(q.exp), difficulty: rand(1, 3),
-      },
-    });
+  if (REBUILD_Q) {
+    for (const q of ISTQB_MCQ) {
+      await prisma.interviewQuestion.create({
+        data: {
+          categoryId: lvlMap[q.lvl] || Object.values(lvlMap)[0],
+          kind: "MCQ", prompt: J(q.q), options: J(q.options),
+          answer: String(q.answer), explanation: J(q.exp), difficulty: rand(1, 3),
+        },
+      });
+    }
+    console.log(`  ISTQB: ${ISTQB_LEVELS.length} levels, ${ISTQB_MCQ.length} questions`);
   }
-  console.log(`  ISTQB: ${ISTQB_LEVELS.length} levels, ${ISTQB_MCQ.length} questions`);
 
   // ---- Dọn nội dung đã gỡ — CHỈ chạy khi SEED_PRUNE=1 (tường minh yêu cầu) ----
   // KHÔNG đụng tới student/session/accessCode/bookmark trong mọi trường hợp.

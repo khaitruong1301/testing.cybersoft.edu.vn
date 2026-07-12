@@ -40,6 +40,27 @@ export default function AppShell({ children }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
   useEffect(() => { setMenuOpen(false); }, [pathname]);
+
+  // Heartbeat "đang online" — ping cho MỌI người truy cập (khách + học viên).
+  // Khách vãng lai gửi kèm visitorId (lưu localStorage) để đếm không trùng.
+  useEffect(() => {
+    let alive = true;
+    let vid = "";
+    try {
+      vid = localStorage.getItem("cst_vid") || "";
+      if (!vid) { vid = Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem("cst_vid", vid); }
+    } catch {}
+    const ping = () => {
+      if (!alive || (typeof document !== "undefined" && document.hidden)) return;
+      fetch("/api/heartbeat", {
+        method: "POST", cache: "no-store", keepalive: true,
+        headers: { "Content-Type": "application/json" }, body: JSON.stringify({ vid }),
+      }).catch(() => {});
+    };
+    ping();
+    const iv = setInterval(ping, 30000);
+    return () => { alive = false; clearInterval(iv); };
+  }, [student]);
   useEffect(() => {
     const onDoc = (e) => { if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false); };
     document.addEventListener("mousedown", onDoc);

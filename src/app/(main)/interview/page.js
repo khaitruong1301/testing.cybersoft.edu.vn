@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import InterviewBrowser from "@/components/InterviewBrowser";
+import { getSettings, num } from "@/lib/settings";
 
 export const dynamic = "force-dynamic";
 
@@ -17,11 +18,14 @@ export default async function InterviewPage() {
     include: { _count: { select: { questions: true } } },
   });
   const plain = categories.map((c) => ({ id: c.id, title: c.title, icon: c.icon, count: c._count.questions }));
+  const settings = await getSettings();
+  const perSession = num(settings.interview_question_count, 30);
   return (
     <InterviewBrowser
       categories={plain}
       titleKey="nav_interview"
       subtitleKey="interview_subtitle"
+      perSession={perSession}
     />
   );
 }

@@ -1,6 +1,6 @@
 // CyberSoft Tester — data model
 // -------------------------------------------------------------------
-// TRIỂN KHAI HIỆN TẠI: provider = "sqlite" (giống site anh em entrance —
+// TRIỂN KHAI HIỆN TẠI: provider = "postgresql" (giống site anh em entrance —
 // gọn, tự chứa, không cần cài DB server). DATABASE_URL trỏ tới file .db:
 //   - Dev:  DATABASE_URL="file:./dev.db"          (→ prisma/dev.db)
 //   - Prod: DATABASE_URL="file:C:/ProgramData/testing/prod.db"  (nằm NGOÀI thư
@@ -17,7 +17,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 

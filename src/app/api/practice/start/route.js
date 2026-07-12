@@ -36,6 +36,9 @@ export async function POST(req) {
   } else if (categoryId && category?.tab === "ISTQB") {
     // LUYỆN THI ISTQB: mỗi lần bốc NGẪU NHIÊN một đề con từ ngân hàng của level.
     picked = sample(all.filter((q) => q.kind === "MCQ"), num(settings.istqb_question_count, 40));
+  } else if (categoryId && category?.tab === "INTERVIEW") {
+    // LUYỆN PHỎNG VẤN: mỗi lượt bốc NGẪU NHIÊN theo cấu hình (mặc định 30 câu).
+    picked = sample(all, num(settings.interview_question_count, 30));
   } else if (categoryId) {
     // PRACTICE trong 1 danh mục khác: LÀM HẾT toàn bộ câu (MCQ trước, tự luận sau).
     const mcq = all.filter((q) => q.kind === "MCQ");

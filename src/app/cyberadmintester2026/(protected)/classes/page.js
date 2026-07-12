@@ -25,6 +25,8 @@ export default function ClassesPage() {
   }, [filterBranch]);
   useEffect(() => {
     load();
+    const iv = setInterval(load, 8000);
+    return () => clearInterval(iv);
   }, [load]);
 
   async function submit(e) {

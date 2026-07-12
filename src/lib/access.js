@@ -11,11 +11,13 @@ export function toInt(v, fallback = 0) {
 
 // Số ngày truy cập theo loại học viên (0 = VĨNH VIỄN).
 //  - OLD (học viên cũ): access_days_old (mặc định 0 = vĩnh viễn)
-//  - UNREGISTERED (chưa đăng ký): access_days_unregistered (mặc định 7 ngày)
+//  - UNREGISTERED (chưa đăng ký): access_days_unregistered (mặc định 3 ngày — dùng thử)
+//    Quy tắc thống nhất: học viên CHƯA đăng ký chỉ dùng thử tối đa 3 ngày rồi hết hạn.
+//    Muốn full quyền (vĩnh viễn) phải ĐĂNG KÝ HỌC + GHI DANH vào lớp (enrollmentPromotion()).
 export function accessDaysForType(type, settings = {}) {
   return type === "OLD"
     ? toInt(settings.access_days_old, 0)
-    : toInt(settings.access_days_unregistered, 7);
+    : toInt(settings.access_days_unregistered, 3);
 }
 
 // Tính mốc hết hạn tính TỪ lần đăng nhập đầu. days <= 0 => null (vĩnh viễn).
