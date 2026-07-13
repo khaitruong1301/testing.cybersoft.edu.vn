@@ -251,6 +251,23 @@ async function main() {
       });
 
       if (!cur) {
+        // ── TỰ CHỮA: không thấy bài theo slug canonical, nhưng có thể bài đã tồn tại
+        //    trên prod với SLUG CŨ (vd seed gốc dùng stableSlug tiếng Anh trước khi có
+        //    art.slug). Nếu có bài CÙNG category+title đang mang slug khác -> ĐỔI slug
+        //    bản đó về canonical (giữ nguyên id/view/bookmark/vote), KHÔNG chèn bản mới
+        //    -> tránh nhân đôi. wantedSlugs đảm bảo không đụng bài khác cùng lô.
+        const stale = await prisma.article.findFirst({
+          where: { categoryId: cat.id, title: content.title, slug: { notIn: Array.from(wantedSlugs) } },
+          include: { pages: { orderBy: { order: "asc" }, select: { order: true, kind: true, content: true, caption: true } } },
+        });
+        if (stale) {
+          nUpdate++;
+          ops.push(prisma.article.update({
+            where: { id: stale.id },
+            data: { ...content, slug, pages: { deleteMany: {}, create: wantPages } },
+          }));
+          continue;
+        }
         nInsert++;
         ops.push(prisma.article.create({
           data: {
