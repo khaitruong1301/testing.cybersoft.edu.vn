@@ -30,21 +30,26 @@ Khi cần **1 bài công nghệ mới cho Tester** đẩy lên production nhanh,
 lịch mỗi ngày. Không dùng cho slide/PR marketing, không dùng để thêm câu hỏi (đó là
 [[CAITIEN_tester_istqb_deployed_ok]]).
 
-## 1. Danh mục đích (route chủ đề vào đây — đều đã tồn tại, KHÔNG tạo mới)
-Chọn danh mục hợp chủ đề nhất trong `prisma/topics.mjs` → `DOC_CATEGORIES`:
+## 1. Danh mục đích — CHỈ dùng danh mục ĐANG hiển thị (do seed duy trì)
+⚠️ **QUAN TRỌNG:** `seed.mjs` chỉ tạo/giữ một số danh mục (`DOCS_KEEP` + block riêng: manual-testing,
+playwright-tools, ai-in-testing, automation-tools, performance-api, enterprise-realworld, interview-scenarios).
+Các slug **đã gộp/không dùng** như `ai-agent-testing`, `claude-testing`, `automation-thinking`, `ai-in-testing`(cũ),
+`automation-testing`, `claude-testing` **vẫn còn trong topics.mjs nhưng KHÔNG được seed** → nếu route bài vào
+đó, `sync_docs` sẽ **UPSERT TẠO LẠI** danh mục đã gộp (lỗi đã xảy ra 2026-07-13). **TUYỆT ĐỐI chỉ route vào
+các danh mục dưới đây:**
 
 | categorySlug | Dành cho chủ đề |
 |---|---|
-| `ai-in-testing` | AI hỗ trợ kiểm thử: sinh testcase/dữ liệu bằng AI, self-healing, visual AI |
-| `ai-agent-testing` | Kiểm thử AI agent / hệ thống LLM, đánh giá agent, guardrails |
-| `claude-testing` | Dùng Claude/Claude Code trong quy trình QA, MCP, tự động hoá bằng LLM |
-| `automation-thinking` | Tư duy & chiến lược automation hiện đại (shift-left, contract, CI/CD) |
+| `ai-in-testing` | **Mọi chủ đề AI**: AI hỗ trợ kiểm thử, AI agent / LLM testing, Claude/Claude Code/MCP, RAG, hallucination, guardrails, self-healing, visual AI |
+| `automation-tools` | Automation hiện đại: shift-left, CI/CD, contract testing, tư duy automation, flaky, coverage gate |
 | `playwright-tools` | Playwright & hệ sinh thái công cụ automation mới |
-| `performance-api` | Hiệu năng/API hiện đại: k6, Grafana, observability, testing in prod |
+| `performance-api` | Hiệu năng/API hiện đại: k6, Grafana, observability, testing in prod, distributed tracing |
 
-`startOrder` khi wire phải **KHỚP `seed.mjs`** cho danh mục đó (xem
-`references/deploy-to-production.md` §3 của skill gốc). Nếu danh mục chưa có bài nào trong `sync_docs.mjs`
-`SOURCES`, thêm một mục mới `{ categorySlug, startOrder, docs: [...] }`.
+> Danh mục AI-agent và Claude ĐÃ được gộp vào `ai-in-testing` ("AI/AI-Agent trong Testing"). Đừng dùng
+> `ai-agent-testing`/`claude-testing`/`automation-thinking` làm `categorySlug` nữa.
+
+`startOrder`: dùng **90** để bài mới xếp sau bài cũ trong danh mục (không xáo trộn thứ tự bài đang có).
+Nếu danh mục chưa có mục trong `sync_docs.mjs` `SOURCES`, thêm `{ categorySlug, startOrder: 90, docs: [...] }`.
 
 ## 2. Quy trình MỘT lần chạy (5 bài / ngày)
 

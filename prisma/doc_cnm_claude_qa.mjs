@@ -34,7 +34,7 @@ function makeDoc(cfg) {
     howTo: cfg.howTo,
   });
   return {
-    categorySlug: "claude-testing", slug: cfg.slug, cover, level: "intermediate",
+    categorySlug: "ai-in-testing", slug: cfg.slug, cover, level: "intermediate",
     tags: tags("congnghe", "saas", "aitesting", "intermediate", "seo"),
     title: cfg.title, summary: cfg.summary, seo, pages: buildDoc(cfg.pages),
   };

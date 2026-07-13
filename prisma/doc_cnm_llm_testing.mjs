@@ -33,7 +33,7 @@ function makeDoc(cfg) {
     howTo: cfg.howTo,
   });
   return {
-    categorySlug: "ai-agent-testing", slug: cfg.slug, cover, level: "advanced",
+    categorySlug: "ai-in-testing", slug: cfg.slug, cover, level: "advanced",
     tags: tags("congnghe", "saas", "aitesting", "advanced", "seo"),
     title: cfg.title, summary: cfg.summary, seo, pages: buildDoc(cfg.pages),
   };

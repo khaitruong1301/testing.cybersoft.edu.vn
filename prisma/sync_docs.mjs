@@ -95,12 +95,12 @@ const SOURCES = [
     startOrder: 1, // seed.mjs: `let mo = 1`
     docs: [...BEGINNER_MANUAL_DOCS, ...BEGINNER_MANUAL_ENT_DOCS, ...MANUAL_BEGINNER_DEFECT_01, ...MANUAL_BEGINNER_SEVPRI_01, ...MANUAL_BEGINNER_NEGATIVE_01, ...MB_TEST_DATA_01, ...MB_YEUCAU_01, ...MB_DANGNHAP_01, ...MB_TIMKIEM_01, ...MB_TESTREPORT_01, ...MB_GIOHANG_01, ...MB_UPLOAD_01, ...MB_THONGBAO_01, ...MB_EMAILOTP_01, ...MB_PHANTRANG_01, ...MB_DANGONNGU_01, ...MB_PHANQUYEN_01, ...MB_RESETPW_01, ...MB_SMOKESANITY_01, ...MB_JIRA_01, ...MB_USABILITY_01, ...MB_A11Y_01, ...MA_ERRORGUESS_01, ...MA_RISKBASED_01, ...MA_USECASE_01, ...MA_DOMAIN_01, ...MA_APIMANUAL_01, ...MA_SECURITY_01, ...MA_STRATEGY_01, ...MA_COVERAGE_01, ...MA_RTM_01, ...MA_REGSEL_01, ...MA_SBTM_01, ...MA_RECOVERY_01, ...MA_INSTALL_01, ...MA_MOBILE_01, ...MA_CONCURRENCY_01, ...MA_RCA_01, ...MA_METRICS_01, ...MA_VOLUME_01, ...MA_COMPLIANCE_01, ...MA_RECON_01, ...MA_TCPATTERN_01, ...MA_E2E_01, ...MA_BACKCOMPAT_01, ...MA_L10N_01, ...MANUAL_ADV_01, ...MANUAL_STATE_01],
   },
-  // ── Công nghệ mới cho Tester (1 bài/danh mục, thêm dần) ──
-  { categorySlug: "ai-in-testing",      startOrder: 90, docs: [...CNM_AI_TESTCASE_01] },
-  { categorySlug: "ai-agent-testing",   startOrder: 90, docs: [...CNM_LLM_TESTING_01] },
-  { categorySlug: "claude-testing",     startOrder: 90, docs: [...CNM_CLAUDE_QA_01] },
-  { categorySlug: "automation-thinking", startOrder: 90, docs: [...CNM_SHIFT_LEFT_01] },
-  { categorySlug: "playwright-tools",   startOrder: 90, docs: [...CNM_PW_COMPONENT_01] },
+  // ── Công nghệ mới cho Tester — route vào danh mục ĐANG hiển thị (tránh tái tạo danh mục đã gộp) ──
+  // AI/LLM/Claude -> ai-in-testing (danh mục gộp "AI/AI-Agent trong Testing")
+  { categorySlug: "ai-in-testing",   startOrder: 90, docs: [...CNM_AI_TESTCASE_01, ...CNM_LLM_TESTING_01, ...CNM_CLAUDE_QA_01] },
+  // Shift-left/CI -> automation-tools ("Automation Testing")
+  { categorySlug: "automation-tools", startOrder: 90, docs: [...CNM_SHIFT_LEFT_01] },
+  { categorySlug: "playwright-tools", startOrder: 90, docs: [...CNM_PW_COMPONENT_01] },
 ];
 
 const prisma = new PrismaClient();

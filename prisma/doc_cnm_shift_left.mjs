@@ -33,7 +33,7 @@ function makeDoc(cfg) {
     howTo: cfg.howTo,
   });
   return {
-    categorySlug: "automation-thinking", slug: cfg.slug, cover, level: "advanced",
+    categorySlug: "automation-tools", slug: cfg.slug, cover, level: "advanced",
     tags: tags("congnghe", "fintech", "cicd", "advanced", "seo"),
     title: cfg.title, summary: cfg.summary, seo, pages: buildDoc(cfg.pages),
   };
