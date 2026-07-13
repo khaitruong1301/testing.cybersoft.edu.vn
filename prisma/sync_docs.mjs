@@ -28,6 +28,7 @@
 import { PrismaClient } from "@prisma/client";
 import { classifyMotif, makeThumb } from "./thumbnail.mjs";
 import { DOC_CATEGORIES } from "./topics.mjs";
+import { AUTOMATION_DOCS } from "./doc_automation_index.mjs";
 
 // ---- Nguồn bài viết. Thêm danh mục mới thì thêm một mục vào SOURCES. --------
 // startOrder phải KHỚP với seed.mjs để hai đường ghi ra cùng `order`.
@@ -88,6 +89,7 @@ import { CNM_SHIFT_LEFT_01 } from "./doc_cnm_shift_left.mjs";
 import { CNM_PW_COMPONENT_01 } from "./doc_cnm_pw_component.mjs";
 
 const SOURCES = [
+  { categorySlug: "automation-testing", startOrder: 200, docs: [...AUTOMATION_DOCS] },
   {
     categorySlug: "manual-testing",
     startOrder: 1, // seed.mjs: `let mo = 1`
