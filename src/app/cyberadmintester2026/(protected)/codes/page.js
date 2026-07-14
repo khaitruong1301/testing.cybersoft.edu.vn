@@ -157,7 +157,7 @@ function ExcelCode() {
         <div>
           <label className="mb-1 block text-sm font-semibold text-slate-600">Loại học viên</label>
           <select value={type} onChange={(e) => setType(e.target.value)} className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm">
-            <option value="UNREGISTERED">Chưa đăng ký (dùng thử 3 ngày)</option>
+            <option value="UNREGISTERED">Chưa đăng ký (truy cập vĩnh viễn)</option>
             <option value="OLD">Học viên cũ (truy cập vĩnh viễn)</option>
           </select>
         </div>

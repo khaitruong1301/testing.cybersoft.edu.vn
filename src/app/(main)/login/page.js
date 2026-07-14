@@ -124,11 +124,11 @@ export default function LoginPage() {
               )}
               <button type="button" onClick={isTrial ? requestTrial : requestCode} disabled={sending}
                 className="w-full rounded-xl bg-brand-600 py-3 text-sm font-bold text-white disabled:opacity-60">
-                {sending ? "…" : isTrial ? tt("Nhận mã học thử", "Get trial code", "お試しコードを受け取る") : t("submit")}
+                {sending ? "…" : isTrial ? tt("Nhận mã truy cập", "Get access code", "アクセスコードを受け取る") : t("submit")}
               </button>
               <p className="text-center text-[11px] leading-snug text-slate-400">
                 {isTrial
-                  ? tt("Học thử MIỄN PHÍ 3 ngày — mã gửi qua email. Mỗi email 1 lần.", "Free 3-day trial — code sent by email. One per email.", "3日間無料お試し。メール1回のみ。")
+                  ? tt("Truy cập MIỄN PHÍ vĩnh viễn — mã xác minh gửi qua email. Xác minh 1 lần, lần sau vào thẳng bằng email + SĐT.", "Free lifetime access — a verification code is emailed. Verify once, then sign in with email + phone.", "無料・無期限アクセス。確認コードをメールで送信。1回確認後はメールと電話番号でログイン。")
                   : tt("Lần đầu gửi mã qua email; các lần sau vào thẳng.", "First time emailed a code; after that log in directly.", "初回のみメール送信。")}
               </p>
             </>

@@ -202,7 +202,7 @@ export default function StudentsPage() {
         </div>
       )}
       <p className="mt-3 text-xs text-slate-400">
-        Ghi danh vào lớp sẽ tự chuyển học viên sang “học viên cũ” và mở full quyền (vĩnh viễn). Học viên chưa đăng ký chỉ dùng thử tối đa 3 ngày rồi hết hạn.
+        Ghi danh vào lớp sẽ tự chuyển học viên sang “học viên cũ” và mở full quyền (vĩnh viễn). Mọi học viên (kể cả chưa đăng ký) đều truy cập vĩnh viễn.
       </p>
 
       {adding && <AddModal onClose={() => setAdding(false)} onDone={() => { setAdding(false); load(); }} />}
@@ -270,7 +270,7 @@ function AddModal({ onClose, onDone }) {
       </label>
       <label className="block text-xs font-semibold text-slate-500">Loại
         <select value={type} onChange={(e) => setType(e.target.value)} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm">
-          <option value="UNREGISTERED">Chưa đăng ký (dùng thử 3 ngày)</option>
+          <option value="UNREGISTERED">Chưa đăng ký (truy cập vĩnh viễn)</option>
           <option value="OLD">Học viên cũ (vĩnh viễn)</option>
         </select>
       </label>

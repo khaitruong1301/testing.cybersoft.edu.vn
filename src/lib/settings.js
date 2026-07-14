@@ -3,7 +3,7 @@ import { prisma } from "./prisma";
 // Default configurable settings.
 export const DEFAULTS = {
   access_days_old: "0", // học viên cũ: 0 = xem VĨNH VIỄN (không hết hạn)
-  access_days_unregistered: "3", // học viên chưa đăng ký: dùng thử tối đa 3 ngày
+  access_days_unregistered: "0", // chưa đăng ký: 0 = VĨNH VIỄN (đã bỏ học thử — mở truy cập cho tất cả)
   extend_days_old: "0", // gia hạn học viên cũ: 0 = vĩnh viễn
   extend_days_unregistered: "3", // gia hạn chưa đăng ký: 3 ngày (thống nhất)
   quiz_mcq_count: "30", // số câu trắc nghiệm mỗi lượt luyện

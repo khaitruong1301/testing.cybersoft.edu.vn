@@ -9,30 +9,21 @@ export function toInt(v, fallback = 0) {
   return Number.isFinite(n) ? n : fallback;
 }
 
-// Số ngày truy cập theo loại học viên (0 = VĨNH VIỄN).
-//  - OLD (học viên cũ): access_days_old (mặc định 0 = vĩnh viễn)
-//  - UNREGISTERED (chưa đăng ký): access_days_unregistered (mặc định 3 ngày — dùng thử)
-//    Quy tắc thống nhất: học viên CHƯA đăng ký chỉ dùng thử tối đa 3 ngày rồi hết hạn.
-//    Muốn full quyền (vĩnh viễn) phải ĐĂNG KÝ HỌC + GHI DANH vào lớp (enrollmentPromotion()).
-export function accessDaysForType(type, settings = {}) {
-  return type === "OLD"
-    ? toInt(settings.access_days_old, 0)
-    : toInt(settings.access_days_unregistered, 3);
+// TRUY CẬP VĨNH VIỄN CHO MỌI HỌC VIÊN (kể cả chưa đăng ký) — đã BỎ hạn học thử 3 ngày.
+// Luôn trả 0 ngày = vĩnh viễn, bất kể loại/cấu hình. Ghi danh vẫn dùng enrollmentPromotion().
+export function accessDaysForType(_type, _settings = {}) {
+  return 0; // 0 = VĨNH VIỄN cho tất cả
 }
 
-// Tính mốc hết hạn tính TỪ lần đăng nhập đầu. days <= 0 => null (vĩnh viễn).
-export function computeAccessExpires(type, settings = {}, now = new Date()) {
-  const days = accessDaysForType(type, settings);
-  return days > 0 ? new Date(now.getTime() + days * DAY_MS) : null;
+// Không đặt mốc hết hạn nữa -> luôn null (vĩnh viễn).
+export function computeAccessExpires(_type, _settings = {}, _now = new Date()) {
+  return null;
 }
 
 // Học viên còn quyền truy cập không?
-//  - Bị khoá (active=false) -> không.
-//  - accessExpires null -> vĩnh viễn -> có.
-//  - accessExpires đã qua -> hết hạn -> không.
-export function hasAccess(student, now = new Date()) {
+//  - Chỉ chặn khi bị admin KHOÁ (active=false). KHÔNG còn chặn theo thời hạn.
+export function hasAccess(student, _now = new Date()) {
   if (!student || !student.active) return false;
-  if (student.accessExpires && new Date(student.accessExpires) < now) return false;
   return true;
 }
 

@@ -36,7 +36,7 @@ export default async function AdminDashboard() {
         <ol className="list-decimal space-y-1 pl-5 text-sm text-slate-600">
           <li>Vào <b>Chi nhánh</b>: tạo danh sách chi nhánh CyberSoft.</li>
           <li>Vào <b>Lớp học</b>: tạo lớp (tên, mã, lịch, chi nhánh) → mở chi tiết lớp để <b>ghi danh</b> hoặc <b>import Excel</b> học viên vào lớp. Ghi danh sẽ tự chuyển học viên thành “học viên cũ” (đủ quyền vĩnh viễn).</li>
-          <li>Vào <b>Học viên</b>: tìm/lọc theo lớp, sửa email/phone, gia hạn, khoá/mở. User chưa đăng ký chỉ dùng thử 7 ngày.</li>
+          <li>Vào <b>Học viên</b>: tìm/lọc theo lớp, sửa email/phone, gia hạn, khoá/mở. Mọi học viên truy cập vĩnh viễn (kể cả chưa đăng ký).</li>
           <li>Vào <b>Sinh mã (Excel)</b>: cấp mã dùng thử/độc lập không gắn lớp (nếu cần).</li>
           <li>Vào <b>Cấu hình</b>: đổi mốc thời gian truy cập & số câu luyện/mock.</li>
         </ol>

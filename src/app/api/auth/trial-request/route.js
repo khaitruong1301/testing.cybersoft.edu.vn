@@ -107,6 +107,6 @@ export async function POST(req) {
     ok: true,
     sentTo: maskEmail(student.email),
     remaining: MAX_CODES_PER_DAY - (sentToday + 1),
-    message: `Đã gửi mã học thử tới ${maskEmail(student.email)} (hiệu lực 5 phút). Học thử tối đa 3 ngày.`,
+    message: `Đã gửi mã xác minh tới ${maskEmail(student.email)} (hiệu lực 5 phút). Truy cập vĩnh viễn — xác minh 1 lần, lần sau vào thẳng bằng email + SĐT.`,
   });
 }
