@@ -9,6 +9,8 @@ import { AU_ASSERTION_01 } from "./doc_au_assertion.mjs";
 import { AU_RUNNER_01 } from "./doc_au_runner.mjs";
 import { AU_TESTDATA_01 } from "./doc_au_testdata.mjs";
 import { AU_STRUCTURE_01 } from "./doc_au_structure.mjs";
+import { AU_DATADRIVEN_01 } from "./doc_au_datadriven.mjs";
+import { AU_LOGINFLOW_01 } from "./doc_au_login_flow.mjs";
 
 export const AUTOMATION_DOCS = [
   ...AU_INTRO_01,
@@ -19,4 +21,6 @@ export const AUTOMATION_DOCS = [
   ...AU_RUNNER_01,
   ...AU_TESTDATA_01,
   ...AU_STRUCTURE_01,
+  ...AU_DATADRIVEN_01,
+  ...AU_LOGINFLOW_01,
 ];
