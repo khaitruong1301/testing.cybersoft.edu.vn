@@ -87,6 +87,12 @@ import { CNM_LLM_TESTING_01 } from "./doc_cnm_llm_testing.mjs";
 import { CNM_CLAUDE_QA_01 } from "./doc_cnm_claude_qa.mjs";
 import { CNM_SHIFT_LEFT_01 } from "./doc_cnm_shift_left.mjs";
 import { CNM_PW_COMPONENT_01 } from "./doc_cnm_pw_component.mjs";
+// Bài "Người mới" (beginner) cho từng danh mục — để tab "Dành cho người mới" có bài
+import { CNM_BEG_AI_01 } from "./doc_cnm_beg_ai.mjs";
+import { CNM_BEG_PW_01 } from "./doc_cnm_beg_playwright.mjs";
+import { CNM_BEG_AUTO_01 } from "./doc_cnm_beg_automation.mjs";
+import { CNM_BEG_ENT_01 } from "./doc_cnm_beg_enterprise.mjs";
+import { CNM_BEG_PERF_01 } from "./doc_cnm_beg_performance.mjs";
 
 const SOURCES = [
   { categorySlug: "automation-testing", startOrder: 200, docs: [...AUTOMATION_DOCS] },
@@ -97,10 +103,13 @@ const SOURCES = [
   },
   // ── Công nghệ mới cho Tester — route vào danh mục ĐANG hiển thị (tránh tái tạo danh mục đã gộp) ──
   // AI/LLM/Claude -> ai-in-testing (danh mục gộp "AI/AI-Agent trong Testing")
-  { categorySlug: "ai-in-testing",   startOrder: 90, docs: [...CNM_AI_TESTCASE_01, ...CNM_LLM_TESTING_01, ...CNM_CLAUDE_QA_01] },
+  { categorySlug: "ai-in-testing",   startOrder: 90, docs: [...CNM_AI_TESTCASE_01, ...CNM_LLM_TESTING_01, ...CNM_CLAUDE_QA_01, ...CNM_BEG_AI_01] },
   // Shift-left/CI -> automation-tools ("Automation Testing")
-  { categorySlug: "automation-tools", startOrder: 90, docs: [...CNM_SHIFT_LEFT_01] },
-  { categorySlug: "playwright-tools", startOrder: 90, docs: [...CNM_PW_COMPONENT_01] },
+  { categorySlug: "automation-tools", startOrder: 90, docs: [...CNM_SHIFT_LEFT_01, ...CNM_BEG_AUTO_01] },
+  { categorySlug: "playwright-tools", startOrder: 90, docs: [...CNM_PW_COMPONENT_01, ...CNM_BEG_PW_01] },
+  // Bài "Người mới" cho các danh mục còn thiếu tab beginner
+  { categorySlug: "enterprise-realworld", startOrder: 90, docs: [...CNM_BEG_ENT_01] },
+  { categorySlug: "performance-api",       startOrder: 90, docs: [...CNM_BEG_PERF_01] },
 ];
 
 const prisma = new PrismaClient();
