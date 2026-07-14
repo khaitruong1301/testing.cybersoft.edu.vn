@@ -13,6 +13,8 @@ import { AU_DATADRIVEN_01 } from "./doc_au_datadriven.mjs";
 import { AU_LOGINFLOW_01 } from "./doc_au_login_flow.mjs";
 import { AU_API_01 } from "./doc_au_api.mjs";
 import { AU_DEBUG_01 } from "./doc_au_debug.mjs";
+import { AU_CICD_01 } from "./doc_au_cicd.mjs";
+import { AU_CROSSBROWSER_01 } from "./doc_au_crossbrowser.mjs";
 
 export const AUTOMATION_DOCS = [
   ...AU_INTRO_01,
@@ -27,4 +29,6 @@ export const AUTOMATION_DOCS = [
   ...AU_LOGINFLOW_01,
   ...AU_API_01,
   ...AU_DEBUG_01,
+  ...AU_CICD_01,
+  ...AU_CROSSBROWSER_01,
 ];
