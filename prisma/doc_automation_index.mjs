@@ -7,6 +7,8 @@ import { AU_LOCATORS_01 } from "./doc_au_locators.mjs";
 import { AU_WAITS_01 } from "./doc_au_waits.mjs";
 import { AU_ASSERTION_01 } from "./doc_au_assertion.mjs";
 import { AU_RUNNER_01 } from "./doc_au_runner.mjs";
+import { AU_TESTDATA_01 } from "./doc_au_testdata.mjs";
+import { AU_STRUCTURE_01 } from "./doc_au_structure.mjs";
 
 export const AUTOMATION_DOCS = [
   ...AU_INTRO_01,
@@ -15,4 +17,6 @@ export const AUTOMATION_DOCS = [
   ...AU_WAITS_01,
   ...AU_ASSERTION_01,
   ...AU_RUNNER_01,
+  ...AU_TESTDATA_01,
+  ...AU_STRUCTURE_01,
 ];
