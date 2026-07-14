@@ -15,6 +15,8 @@ import { AU_API_01 } from "./doc_au_api.mjs";
 import { AU_DEBUG_01 } from "./doc_au_debug.mjs";
 import { AU_CICD_01 } from "./doc_au_cicd.mjs";
 import { AU_CROSSBROWSER_01 } from "./doc_au_crossbrowser.mjs";
+import { AU_MOBILE_01 } from "./doc_au_mobile.mjs";
+import { AU_VISUAL_01 } from "./doc_au_visual.mjs";
 
 export const AUTOMATION_DOCS = [
   ...AU_INTRO_01,
@@ -31,4 +33,6 @@ export const AUTOMATION_DOCS = [
   ...AU_DEBUG_01,
   ...AU_CICD_01,
   ...AU_CROSSBROWSER_01,
+  ...AU_MOBILE_01,
+  ...AU_VISUAL_01,
 ];
