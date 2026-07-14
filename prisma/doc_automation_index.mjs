@@ -11,6 +11,8 @@ import { AU_TESTDATA_01 } from "./doc_au_testdata.mjs";
 import { AU_STRUCTURE_01 } from "./doc_au_structure.mjs";
 import { AU_DATADRIVEN_01 } from "./doc_au_datadriven.mjs";
 import { AU_LOGINFLOW_01 } from "./doc_au_login_flow.mjs";
+import { AU_API_01 } from "./doc_au_api.mjs";
+import { AU_DEBUG_01 } from "./doc_au_debug.mjs";
 
 export const AUTOMATION_DOCS = [
   ...AU_INTRO_01,
@@ -23,4 +25,6 @@ export const AUTOMATION_DOCS = [
   ...AU_STRUCTURE_01,
   ...AU_DATADRIVEN_01,
   ...AU_LOGINFLOW_01,
+  ...AU_API_01,
+  ...AU_DEBUG_01,
 ];
