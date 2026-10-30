@@ -22,8 +22,8 @@ Internet ─HTTPS→ IIS (site "testing", 443/80)
               Postgres (DATABASE_URL trong C:\apps\testing\.env)
 ```
 
-**Deploy = `git push` vào `main`** → GitHub Actions: job `ci` (ubuntu, prisma validate + build) →
-job `deploy` (self-hosted windows runner chạy `deploy/deploy.ps1`).
+**Deploy = `git push` vào `main`** → GitHub Actions (không dùng runner máy GitHub):
+job `deploy` trên self-hosted windows runner chạy `deploy/deploy.ps1` (prisma generate + db push + build + restart + health check).
 
 ---
 

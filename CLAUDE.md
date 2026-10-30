@@ -88,3 +88,14 @@ Không có test suite — kiểm chứng bằng cách chạy app & gọi API th�
 Xem [.claude/README.md](.claude/README.md): agents (`backend-dev`, `frontend-dev`, `content-editor`,
 `security-reviewer`), commands (`/run`, `/seed`, `/stats`, `/backup-db`, `/reset-admin`, `/deploy-status`),
 skills (`run-server`, `content-bank`, `db-inspect`, `deploy-ops`), hook `validate-content`.
+
+## Ebook "Chuẩn bị trước khoá AI Tester" (tài liệu trả phí theo email)
+
+- Học viên: `/tai-lieu-ai-tester` (kệ 8 cuốn, băng giới thiệu ở đầu `/documents`). Đọc tại `/ebook-ai-tester/<slug>` (trình đọc lật trang / cuộn).
+- Quyền: bảng `AccessGrant` (email chữ thường + `product = AI_TESTER_PREP`). Admin kích hoạt / gỡ ở `/cyberadmintester2026/ebook-ai-tester`
+  (API `/api/admin/ebook-access`); kích hoạt được trước khi học viên có tài khoản, khớp theo email đăng nhập.
+- Tệp sách ở `content/ebook-ai-tester/<slug>/` (NGOÀI `public/`), chỉ phục vụ qua route `src/app/ebook-ai-tester/[slug]/[[...p]]/route.js`:
+  chưa đăng nhập → `/login?next=`, chưa kích hoạt → `/tai-lieu-ai-tester`; watermark ghi email người đọc; `noindex`.
+  Ảnh bìa công khai ở `public/ebook-ai-tester-bia/`. Danh mục: `content/ebook-ai-tester/index.json`.
+- Cập nhật sách: dựng ở `TAILIEU_VIBE_TESTER/00_CHUAN_BI_TRUOC_KHOA/` (skill ebook-truc-quan-3d) rồi
+  `python3 xuat_len_testing.py <repo này>`.

@@ -1,0 +1,95 @@
+[
+ {
+  "so": 1,
+  "slug": "may-tinh-cua-tester",
+  "tieu_de": "Máy tính của tester: terminal, thư mục và cài đặt công cụ",
+  "so_trang": 62,
+  "chuong": [
+   "Tệp, thư mục và đường dẫn",
+   "Terminal: nói chuyện với máy bằng lệnh",
+   "Cài đặt công cụ từng bước trên Mac và Windows",
+   "Chạy một app web trên máy của bạn",
+   "Biến môi trường và tệp .env"
+  ]
+ },
+ {
+  "so": 3,
+  "slug": "trang-web-chay-the-nao",
+  "tieu_de": "Trang web chạy thế nào: trình duyệt, DOM, DevTools và locator",
+  "so_trang": 48,
+  "chuong": [
+   "Trình duyệt gọi máy chủ và vẽ trang",
+   "HTML và cây DOM",
+   "DevTools cho tester",
+   "Cây trợ năng: trang web trong mắt máy",
+   "Locator: chỉ đúng một phần tử, bền qua mọi lần sửa giao diện"
+  ]
+ },
+ {
+  "so": 4,
+  "slug": "http-va-api-cho-tester",
+  "tieu_de": "HTTP và API cho tester",
+  "so_trang": 57,
+  "chuong": [
+   "Request và response",
+   "JSON đọc cho người mới",
+   "Mã trạng thái tester cần thuộc",
+   "Xác thực: token và cookie phiên",
+   "Gọi API bằng tay",
+   "Thiết kế test case API từ đặc tả"
+  ]
+ },
+ {
+  "so": 5,
+  "slug": "doc-hieu-code-test",
+  "tieu_de": "Đọc hiểu code test: TypeScript tối thiểu cho tester",
+  "so_trang": 47,
+  "chuong": [
+   "Code là công thức nấu ăn",
+   "Biến, dữ liệu và tệp nối tệp",
+   "Hàm và chuyện chờ trình duyệt",
+   "Giải phẫu một tệp test Playwright",
+   "Soát code test do AI viết"
+  ]
+ },
+ {
+  "so": 6,
+  "slug": "kiem-thu-tu-dong-la-gi",
+  "tieu_de": "Kiểm thử tự động là gì: Playwright, báo cáo và test chập chờn",
+  "so_trang": 48,
+  "chuong": [
+   "Manual và tự động khác nhau ở đâu",
+   "Playwright chạy thế nào",
+   "Đọc báo cáo HTML và trace viewer",
+   "Test xanh chưa chắc tốt",
+   "Test chập chờn",
+   "Selenium, Appium và Playwright"
+  ]
+ },
+ {
+  "so": 7,
+  "slug": "ai-agent-cho-tester",
+  "tieu_de": "AI agent cho tester: Claude Code, Codex, luật và quyền",
+  "so_trang": 51,
+  "chuong": [
+   "Chatbot khác agent ở chỗ nào?",
+   "Cài, đăng nhập và chọn chế độ cho agent",
+   "Viết prompt cho việc test",
+   "Luật dự án và quyền của agent",
+   "AI đề xuất, tester kiểm chứng"
+  ]
+ },
+ {
+  "so": 8,
+  "slug": "ci-du-lieu-test-va-bi-mat",
+  "tieu_de": "CI/CD, dữ liệu test và bí mật cho tester",
+  "so_trang": 54,
+  "chuong": [
+   "CI/CD: dây chuyền kiểm hàng tự động",
+   "Đọc CI đỏ như một thám tử",
+   "Dữ liệu test: đúng biên, không giẫm chân nhau",
+   "Bí mật: mật khẩu ở đâu, ai được thấy",
+   "Báo cáo chất lượng: số liệu nói thật"
+  ]
+ }
+]

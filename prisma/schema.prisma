@@ -326,3 +326,17 @@ model Attempt {
   @@index([studentId])
   @@index([mode])
 }
+
+// Quyền xem tài liệu trả phí theo EMAIL (admin kích hoạt sau khi học viên đóng học phí).
+// Gắn theo email chứ không theo Student: admin có thể kích hoạt trước khi học viên tạo tài khoản.
+model AccessGrant {
+  id        String   @id @default(cuid())
+  email     String   // chữ thường, đã trim
+  product   String   @default("AI_TESTER_PREP") // AI_TESTER_PREP = 8 ebook chuẩn bị khoá AI Tester
+  note      String   @default("")
+  grantedBy String   @default("")
+  createdAt DateTime @default(now())
+
+  @@unique([email, product])
+  @@index([email])
+}

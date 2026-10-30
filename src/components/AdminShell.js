@@ -8,6 +8,7 @@ const NAV = [
   { href: "/cyberadmintester2026/classes", label: "Lớp học", icon: "🏫" },
   { href: "/cyberadmintester2026/students", label: "Học viên", icon: "👥" },
   { href: "/cyberadmintester2026/codes", label: "Sinh mã (Excel)", icon: "🔑" },
+  { href: "/cyberadmintester2026/ebook-ai-tester", label: "Ebook AI Tester", icon: "📘" },
   { href: "/cyberadmintester2026/settings", label: "Cấu hình", icon: "⚙️" },
 ];
 

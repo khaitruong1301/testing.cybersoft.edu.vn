@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import DocumentsBrowser from "@/components/DocumentsBrowser";
+import EbookAiTesterBanner from "@/components/EbookAiTesterBanner";
 
 export const dynamic = "force-dynamic";
 
@@ -62,5 +63,10 @@ export default async function DocumentsPage() {
     })),
   }));
 
-  return <DocumentsBrowser categories={plain} />;
+  return (
+    <>
+      <EbookAiTesterBanner />
+      <DocumentsBrowser categories={plain} />
+    </>
+  );
 }

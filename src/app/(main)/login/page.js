@@ -7,6 +7,21 @@ import { useAuth } from "@/lib/AuthContext";
 const MAX_SENDS = 3;
 const MAX_ATTEMPTS = 3;
 
+// Sau đăng nhập: quay lại trang học viên đang mở (?next=, chỉ đường dẫn nội bộ), mặc định /documents.
+function trangSauDangNhap() {
+  try {
+    const n = new URLSearchParams(window.location.search).get("next") || "";
+    if (n.startsWith("/") && !n.startsWith("//") && !n.startsWith("/\\")) return n;
+  } catch {}
+  return "/documents";
+}
+// Trình đọc ebook là route handler (không phải trang React): phải tải lại cả trang, không dùng router.push.
+function diSauDangNhap(router) {
+  const t = trangSauDangNhap();
+  if (t.startsWith("/ebook-ai-tester/")) window.location.assign(t);
+  else router.push(t);
+}
+
 export default function LoginPage() {
   const { t, lang } = useLang();
   const { refresh, student } = useAuth();
@@ -49,7 +64,7 @@ export default function LoginPage() {
       const r = await fetch("/api/auth/request-code", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: form.email, phone: form.phone }) });
       const d = await r.json();
       if (!r.ok) setError(d.error || tt("Không gửi được mã.", "Could not send code.", "コードを送信できません。"));
-      else if (d.loggedIn) { await refresh(); router.push("/documents"); }
+      else if (d.loggedIn) { await refresh(); diSauDangNhap(router); }
       else { setCodeSent(true); setSentMsg(d.message || ""); setAttempts(0); }
     } catch { setError(tt("Có lỗi xảy ra.", "Something went wrong.", "エラーが発生しました。")); }
     finally { setSending(false); }
@@ -80,7 +95,7 @@ export default function LoginPage() {
       const r = await fetch("/api/auth/verify-code", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: form.email, phone: form.phone, code: form.code }) });
       const d = await r.json();
       if (!r.ok) { const n = attempts + 1; setAttempts(n); setError((d.error || tt("Mã không đúng.", "Wrong code.", "コードが違います。")) + ` (${n}/${MAX_ATTEMPTS})`); }
-      else { await refresh(); router.push("/documents"); }
+      else { await refresh(); diSauDangNhap(router); }
     } catch { setError(tt("Có lỗi xảy ra.", "Something went wrong.", "エラーが発生しました。")); }
     finally { setLoading(false); }
   }
