@@ -77,6 +77,22 @@ export async function getCurrentAdmin() {
   }
 }
 
+// Admin đăng nhập thì cũng đăng nhập luôn trang học viên (xem menu, tài liệu như học viên).
+// Dùng một tài khoản học viên trùng email admin (tạo nếu chưa có), loại OLD, đã đăng ký, không bao giờ bị khoá theo hạn.
+export async function createAdminStudentSession(admin) {
+  const email = String(admin.email || "").toLowerCase();
+  let s = await prisma.student.findFirst({ where: { email: { equals: email, mode: "insensitive" } } });
+  if (!s) {
+    s = await prisma.student.create({
+      data: { name: admin.name || "Quản trị viên", email, phone: "", type: "OLD", registered: true, active: true, firstLoginAt: new Date() },
+    });
+  } else if (!s.active || s.type !== "OLD" || !s.registered) {
+    s = await prisma.student.update({ where: { id: s.id }, data: { active: true, type: "OLD", registered: true, accessExpires: null } });
+  }
+  await createStudentSession(s.id);
+  return s;
+}
+
 export function destroyAdminSession() {
   cookies().delete(ADMIN_COOKIE);
 }

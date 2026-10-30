@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
-import { createAdminSession } from "@/lib/session";
+import { createAdminSession, createAdminStudentSession } from "@/lib/session";
 
 export async function POST(req) {
   const { email, password } = await req.json();
@@ -13,5 +13,7 @@ export async function POST(req) {
     return NextResponse.json({ error: "Email hoặc mật khẩu không đúng." }, { status: 401 });
   }
   await createAdminSession(admin.id);
+  // Giữ trạng thái đăng nhập ở trang học viên để admin xem đủ menu, tài liệu (không chặn đăng nhập admin nếu lỗi).
+  await createAdminStudentSession(admin).catch(() => null);
   return NextResponse.json({ ok: true });
 }

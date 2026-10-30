@@ -4,6 +4,7 @@ import "server-only";
 import fs from "fs";
 import path from "path";
 import { prisma } from "./prisma";
+import { getCurrentAdmin } from "./session";
 
 export const PRODUCT = "AI_TESTER_PREP";
 export const ROOT = path.join(process.cwd(), "content", "ebook-ai-tester");
@@ -20,7 +21,9 @@ export function listBooks() {
   }
 }
 
+// Admin đang đăng nhập luôn được đọc (để kiểm tra nội dung); học viên cần email đã được kích hoạt.
 export async function hasGrant(student) {
+  if (await getCurrentAdmin()) return true;
   if (!student?.email) return false;
   const g = await prisma.accessGrant.findUnique({
     where: { email_product: { email: normEmail(student.email), product: PRODUCT } },
