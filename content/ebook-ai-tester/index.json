@@ -13,6 +13,19 @@
   ]
  },
  {
+  "so": 2,
+  "slug": "git-github-cho-tester",
+  "tieu_de": "Git và GitHub cho tester",
+  "so_trang": 61,
+  "chuong": [
+   "Vì sao tester cần Git",
+   "Repo, commit và trạng thái tệp",
+   "Nhánh và gộp",
+   "GitHub: gửi kho Git lên mạng",
+   "Pull request và review"
+  ]
+ },
+ {
   "so": 3,
   "slug": "trang-web-chay-the-nao",
   "tieu_de": "Trang web chạy thế nào: trình duyệt, DOM, DevTools và locator",
